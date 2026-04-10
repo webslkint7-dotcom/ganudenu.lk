@@ -15,6 +15,7 @@ import seedRoutes from './routes/seed.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+let isMongoConnected = false;
 
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
@@ -48,6 +49,8 @@ app.use((err, req, res, next) => {
 });
 
 const connectDB = async () => {
+  if (isMongoConnected) return;
+
   const atlasURI = process.env.MONGO_URI;
   const localURI = process.env.LOCAL_MONGO_URI || 'mongodb://localhost:27017/editorial_db';
 
@@ -75,17 +78,38 @@ const connectDB = async () => {
     } catch (localErr) {
       console.error('CRITICAL: All MongoDB connection attempts failed.');
       console.error('Error Details:', localErr.message);
-      console.log('\n--- ACTION REQUIRED ---');
-      console.log('1. Ensure Local MongoDB service is running (mongod).');
-      console.log('2. OR Whitelist your IP in Atlas: https://cloud.mongodb.com/');
-      process.exit(1);
+      throw localErr;
     }
   }
 
-  app.listen(PORT, () => {
-    console.log(`READY: Server is listening on port ${PORT}`);
-    console.log(`URL: http://localhost:${PORT}`);
-  });
+  isMongoConnected = true;
 };
 
-connectDB();
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`READY: Server is listening on port ${PORT}`);
+      console.log(`URL: http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.log('\n--- ACTION REQUIRED ---');
+    console.log('1. Ensure Local MongoDB service is running (mongod).');
+    console.log('2. OR Whitelist your IP in Atlas: https://cloud.mongodb.com/');
+    process.exit(1);
+  }
+};
+
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default async function handler(req, res) {
+  try {
+    await connectDB();
+    return app(req, res);
+  } catch (err) {
+    console.error('Database connection error:', err.message);
+    return res.status(500).json({ message: 'Database connection failed.' });
+  }
+}
