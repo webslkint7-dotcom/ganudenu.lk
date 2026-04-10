@@ -1,182 +1,211 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-
-const vehicles = [
-  {
-    id: 1,
-    image: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d',
-    title: '2023 Porsche 911 Carrera S',
-    price: 138500,
-    badges: ['VERIFIED', "EDITOR'S PICK"],
-    miles: '2,400 miles',
-    location: 'Stuttgart, DE',
-    details: ['3.2s 0-60', 'PDK Auto', 'Gas'],
-  },
-  {
-    id: 2,
-    image: 'https://images.unsplash.com/photo-1511918984145-48de785d4c4e',
-    title: '2022 BMW M5 CS',
-    price: 124900,
-    badges: ['VERIFIED'],
-    miles: '11,000 miles',
-    location: 'Munich, DE',
-    details: ['627 HP', 'All-Wheel', 'Gas'],
-  },
-  {
-    id: 3,
-    image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba',
-    title: '2024 Tesla Model S Plaid',
-    price: 89990,
-    badges: ['VERIFIED', 'FULL ELECTRIC'],
-    miles: 'Brand New',
-    location: 'Palo Alto, CA',
-    details: ['1,020 HP', '396 mi', 'Electric'],
-  },
-  {
-    id: 4,
-    image: 'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99',
-    title: '1967 Jaguar E-Type',
-    price: 185000,
-    badges: ['HERITAGE EDITION'],
-    miles: 'Fully Restored',
-    location: 'London, UK',
-    details: ['Vintage', 'Manual 4-Spd', 'Gas'],
-  },
-];
-
-const brands = ['BMW', 'Mercedes', 'Audi', 'Tesla'];
-const fuels = ['Electric', 'Hybrid', 'Gasoline'];
+import Footer from '../components/Footer';
+import API from '../api';
+import { resolveImageUrl } from '../utils/imageUrl';
 
 export default function VehiclesList() {
-  const [selectedBrand, setSelectedBrand] = useState('BMW');
-  const [selectedFuels, setSelectedFuels] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const brands = ['BMW', 'Mercedes', 'Audi', 'Tesla', 'Toyota', 'Honda'];
+  const fuelTypes = ['Electric', 'Hybrid', 'Gasoline', 'Diesel'];
+
+  useEffect(() => {
+    API.get('/listings')
+      .then(res => {
+        // Filter for items that look like vehicles
+        const filtered = res.data.filter(l => 
+          String(l.type || '').toUpperCase() === 'VEHICLE' || 
+          String(l.category?.name || l.category || '').toLowerCase().includes('vehic')
+        );
+        setVehicles(filtered);
+      })
+      .catch(() => setError('Failed to load vehicles.'))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <div className="bg-[#fafbfa] min-h-screen font-sans">
+    <div className="bg-[#f5f7fa] min-h-screen font-sans">
       <Navbar isAuthenticated={!!localStorage.getItem('token')} />
 
-      <main className="max-w-7xl mx-auto flex gap-8 py-10 px-6">
+      {/* Hero Header */}
+      <section className="bg-slate-900 py-12 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center"></div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <h1 className="text-4xl font-black mb-2 uppercase tracking-tighter">Search Results for:</h1>
+          <div className="flex items-center gap-2 text-xs font-bold text-blue-500 uppercase tracking-widest">
+            <Link to="/" className="hover:text-white transition">Home</Link>
+            <span>/</span>
+            <span className="text-slate-400">Automotive Collection</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Sub-Search Bar */}
+      <section className="max-w-7xl mx-auto px-6 -mt-8 relative z-20">
+        <div className="bg-white p-4 rounded-2xl shadow-xl border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="flex items-center px-4 py-2 border-r border-slate-100">
+            <span className="mr-3 text-slate-400">📍</span>
+            <select className="bg-transparent border-none w-full text-sm font-bold text-slate-700 outline-none">
+              <option>Select Location</option>
+              <option>California</option>
+              <option>Florida</option>
+              <option>Texas</option>
+            </select>
+          </div>
+          <div className="flex items-center px-4 py-2 border-r border-slate-100">
+            <span className="mr-3 text-slate-400">🚗</span>
+            <select className="bg-transparent border-none w-full text-sm font-bold text-slate-700 outline-none">
+              <option>Select Category</option>
+              <option>Sedans</option>
+              <option>SUVs</option>
+              <option>Coupes</option>
+              <option>Electric</option>
+            </select>
+          </div>
+          <div className="flex items-center px-4 py-2">
+            <span className="mr-3 text-slate-400">⌨️</span>
+            <input type="text" placeholder="Search Brand, Model..." className="bg-transparent border-none w-full text-sm font-bold text-slate-700 outline-none placeholder-slate-300" />
+          </div>
+          <button className="bg-slate-900 hover:bg-blue-900 text-white font-black py-4 rounded-xl uppercase tracking-widest text-xs shadow-lg transition active:scale-95">
+            Find Vehicle
+          </button>
+        </div>
+      </section>
+
+      <main className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-4 gap-12">
+        
         {/* Sidebar Filters */}
-        <aside className="w-72 shrink-0">
-          <div className="flex items-center gap-2 mb-4 text-green-900 font-bold text-lg">
-            <span className="material-symbols-outlined">tune</span> Refine Search
-          </div>
-          <div className="mb-4">
-            <label className="block font-bold mb-1">BRAND</label>
-            <div className="flex gap-2 flex-wrap">
+        <aside className="space-y-8">
+          {/* Brand Filter */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+            <h3 className="text-sm font-black uppercase tracking-widest mb-6 flex justify-between items-center text-slate-900">
+              Brand <span className="text-blue-700">▴</span>
+            </h3>
+            <div className="space-y-3">
               {brands.map(brand => (
-                <button
-                  key={brand}
-                  className={`px-3 py-1 rounded-full border ${selectedBrand === brand ? 'bg-yellow-400 text-zinc-900 font-bold border-yellow-400' : 'bg-zinc-100 text-zinc-700 border-zinc-200'}`}
-                  onClick={() => setSelectedBrand(brand)}
-                >
-                  {brand}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="mb-4">
-            <label className="block font-bold mb-1">YEAR RANGE</label>
-            <div className="flex gap-2">
-              <input className="w-1/2 border rounded-lg px-2 py-1" placeholder="Min" />
-              <input className="w-1/2 border rounded-lg px-2 py-1" placeholder="Max" />
-            </div>
-          </div>
-          <div className="mb-4">
-            <label className="block font-bold mb-1">PRICE RANGE</label>
-            <div className="flex items-center gap-2">
-              <input type="range" min="0" max="260000" className="w-full accent-green-700" />
-              <span className="text-xs">$0</span>
-              <span className="text-xs">$260k+</span>
-            </div>
-          </div>
-          <div className="mb-4">
-            <label className="block font-bold mb-1">FUEL TYPE</label>
-            <div className="flex flex-col gap-2">
-              {fuels.map(fuel => (
-                <label key={fuel} className="flex items-center gap-2 text-zinc-700">
-                  <input type="checkbox" className="accent-green-700" /> {fuel}
+                <label key={brand} className="flex items-center gap-3 font-bold text-slate-500 text-sm cursor-pointer hover:text-blue-900 transition">
+                  <input type="checkbox" className="w-4 h-4 rounded accent-blue-900" />
+                  <span>{brand}</span>
                 </label>
               ))}
             </div>
           </div>
-          <button className="w-full bg-green-700 text-white font-bold py-3 rounded-lg shadow hover:bg-green-800 transition mb-2">Apply Filters</button>
-          <button className="w-full text-green-700 underline text-sm">Clear all</button>
-          <div className="bg-green-50 rounded-lg p-4 mt-6 text-green-900 text-sm">
-            <b>Buy with Confidence</b><br />Our editorial team inspects every luxury vehicle for title clarity and mechanical integrity.
+
+          {/* fuel Filter */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+            <h3 className="text-sm font-black uppercase tracking-widest mb-6 flex justify-between items-center text-slate-900">
+              Fuel Type <span className="text-blue-700">▴</span>
+            </h3>
+            <div className="space-y-3">
+              {fuelTypes.map(fuel => (
+                <label key={fuel} className="flex items-center gap-3 font-bold text-slate-500 text-sm cursor-pointer hover:text-blue-900 transition">
+                  <input type="radio" name="fuel" className="w-4 h-4 accent-blue-900" />
+                  <span>{fuel}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Year Range */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+            <h3 className="text-sm font-black uppercase tracking-widest mb-6 flex justify-between items-center text-slate-900">
+              Year Range <span className="text-blue-700">▴</span>
+            </h3>
+            <div className="flex gap-2">
+              <input type="number" placeholder="Min Year" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:border-blue-700 transition" />
+              <input type="number" placeholder="Max Year" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:border-blue-700 transition" />
+            </div>
+          </div>
+
+          {/* Price Range */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+            <h3 className="text-sm font-black uppercase tracking-widest mb-6 flex justify-between items-center text-slate-900">
+              Price Range <span className="text-blue-700">▴</span>
+            </h3>
+            <div className="flex gap-2 mb-4">
+              <input type="number" placeholder="Min Price" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:border-blue-700 transition" />
+              <input type="number" placeholder="Max Price" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:border-blue-700 transition" />
+            </div>
+            <button className="w-full bg-slate-900 text-white font-black py-4 rounded-xl uppercase tracking-widest text-[10px] shadow-lg hover:bg-blue-900 transition">
+              Apply Filters
+            </button>
           </div>
         </aside>
 
-        {/* Listings Section */}
-        <section className="flex-1">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="text-zinc-400 text-sm mb-1">Home &gt; Marketplace &gt; <span className="text-green-900 font-bold">Vehicles</span></div>
-              <h2 className="font-black text-2xl text-zinc-900 mb-1">Automotive Collection</h2>
-              <div className="text-zinc-500 mb-2">Discover a curated selection of premium pre-owned vehicles, each verified for quality and heritage.</div>
+        {/* Content Area */}
+        <div className="lg:col-span-3">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 border-b border-slate-100 pb-8">
+            <div className="text-sm font-bold text-slate-400">
+               Showing <span className="text-slate-900 font-black">1–{vehicles.length}</span> of <span className="text-slate-900 font-black">{vehicles.length}</span> results
             </div>
-            <div>
-              <label className="text-zinc-500 text-sm mr-2">Sort by:</label>
-              <select className="border rounded-lg px-3 py-2">
+            <div className="flex items-center gap-4">
+              <select className="bg-white border border-slate-100 rounded-full px-6 py-2 text-xs font-black uppercase text-slate-500 outline-none hover:border-blue-700 transition">
                 <option>Featured First</option>
+                <option>Newest</option>
                 <option>Price: Low to High</option>
                 <option>Price: High to Low</option>
-                <option>Newest</option>
               </select>
+              <div className="flex gap-1">
+                 <button className="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-lg active:scale-95 transition">▦</button>
+                 <button className="w-10 h-10 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-slate-300">☰</button>
+              </div>
             </div>
           </div>
 
-          {/* Grid of Vehicles */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {vehicles.map(vehicle => (
-              <div key={vehicle.id} className="bg-white rounded-xl shadow-lg overflow-hidden relative flex flex-col">
-                <img src={vehicle.image} alt={vehicle.title} className="w-full h-56 object-cover" />
-                <div className="absolute top-4 left-4 flex gap-2">
-                  {vehicle.badges.map(b => (
-                    <span key={b} className={`px-3 py-1 rounded-full text-xs font-bold ${b.includes('VERIFIED') ? 'bg-yellow-400 text-zinc-900' : 'bg-green-900 text-white'}`}>{b}</span>
-                  ))}
-                </div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <div className="font-black text-lg mb-1">{vehicle.title}</div>
-                  <div className="text-green-700 font-black text-lg mb-2">${vehicle.price.toLocaleString()}</div>
-                  <div className="text-zinc-500 text-sm mb-1">{vehicle.miles} • {vehicle.location}</div>
-                  <div className="flex gap-4 text-xs text-zinc-700 mb-4">
-                    {vehicle.details.map((d, i) => <span key={i}>{d}</span>)}
+          {loading ? (
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+               {[1, 2, 3].map(i => <div key={i} className="h-96 bg-white animate-pulse rounded-3xl"></div>)}
+             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+              {vehicles.map(vehicle => {
+                const specs = vehicle.vehicleDetails || {};
+                return (
+                  <div key={vehicle._id} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
+                    <div className="relative h-56 overflow-hidden bg-slate-100">
+                      <img src={resolveImageUrl(vehicle.image)} alt={vehicle.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      <div className="absolute top-4 left-4 flex flex-col gap-2">
+                         <span className="bg-slate-900 text-white text-[10px] px-2 py-1 rounded font-black tracking-widest uppercase shadow-md">Verified</span>
+                         <span className="bg-blue-100 text-blue-900 text-[10px] px-2 py-1 rounded font-black tracking-widest uppercase">{specs.fuelType || 'Electric'}</span>
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <div className="text-[10px] font-black text-blue-700 uppercase tracking-widest mb-2">{specs.make || 'BMW'} • {specs.year || '2024'}</div>
+                      <h3 className="font-black text-slate-900 text-lg mb-4 line-clamp-1 uppercase tracking-tight group-hover:text-blue-700 transition">
+                         {vehicle.title}
+                      </h3>
+                      <div className="text-slate-400 text-xs font-bold flex items-center gap-4 mb-6">
+                         <span>🏁 {specs.mileage ? `${specs.mileage.toLocaleString()} km` : '0 km'}</span>
+                         <span>⚙️ {specs.transmission || 'Auto'}</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-4 border-t border-slate-50">
+                         <div className="text-slate-900 font-black text-xl">${vehicle.price?.toLocaleString()}</div>
+                         <Link to={`/vehicle/${vehicle._id}`} className="bg-slate-900 text-white text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-widest hover:bg-blue-700 transition shadow-lg transition active:scale-95">
+                           View Ad
+                         </Link>
+                      </div>
+                    </div>
                   </div>
-                  <button className="bg-green-700 text-white font-bold py-2 rounded-lg hover:bg-green-800 transition mb-2">Inquire Now</button>
-                  <button className="absolute top-4 right-4 bg-white/80 rounded-full p-2 text-xl">🤍</button>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Pagination */}
-          <div className="flex justify-center items-center gap-2 mt-10">
-            <button className="w-10 h-10 rounded-lg border text-zinc-500">&lt;</button>
-            <button className="w-10 h-10 rounded-lg bg-green-700 text-white font-bold">1</button>
-            <button className="w-10 h-10 rounded-lg border text-zinc-500">2</button>
-            <span className="mx-2 text-zinc-400">...</span>
-            <button className="w-10 h-10 rounded-lg border text-zinc-500">12</button>
-            <button className="w-10 h-10 rounded-lg border text-zinc-500">&gt;</button>
+          <div className="flex justify-center items-center gap-3">
+            <button className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">«</button>
+            <button className="w-12 h-12 rounded-xl bg-slate-900 text-white font-black shadow-lg">1</button>
+            <button className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center font-bold text-slate-500">2</button>
+            <button className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">»</button>
           </div>
-        </section>
+        </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white py-12 mt-12 border-t">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <span className="font-black text-lg text-green-900">The Editorial Marketplace</span>
-          <div className="flex flex-wrap gap-6 text-sm text-gray-500 font-medium">
-            <a href="#">Terms of Service</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Safety Tips</a>
-            <a href="#">Sell with Us</a>
-            <a href="#">Contact Support</a>
-          </div>
-          <span className="text-xs text-gray-400">© 2024 The Editorial Marketplace. All rights reserved.</span>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

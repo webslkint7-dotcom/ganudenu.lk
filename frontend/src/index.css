@@ -1,3 +1,78 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    @apply bg-[#f8fafc] text-slate-800 antialiased;
+    font-size: 16px;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    @apply font-black tracking-tight text-slate-900;
+  }
+  h1 { @apply text-4xl lg:text-6xl; }
+  h2 { @apply text-2xl lg:text-4xl; }
+  h3 { @apply text-xl lg:text-2xl; }
+}
+
+.label-caps {
+  @apply text-[11px] font-black uppercase tracking-[0.2em] text-slate-400;
+}
+
+
+.glass-panel {
+  @apply bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)];
+}
+
+.glass-input {
+  @apply bg-white/50 backdrop-blur-md border border-gray-200 rounded-xl px-5 py-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#000080] focus:border-transparent transition-all duration-300 shadow-sm;
+}
+
+.btn-primary {
+  @apply bg-[#000080] hover:bg-[#000099] text-white font-semibold px-8 py-4 rounded-xl shadow-[0_8px_20px_rgb(0,0,128,0.25)] hover:shadow-[0_8px_25px_rgb(0,0,128,0.4)] transition-all duration-300 transform hover:-translate-y-1;
+}
+
+.btn-secondary {
+  @apply bg-white hover:bg-slate-50 text-slate-800 font-semibold px-8 py-4 rounded-xl backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9; 
+}
+::-webkit-scrollbar-thumb {
+  background: #000080; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #000099; 
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 6s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.bg-gradient-radial {
+  background: radial-gradient(circle at center, var(--tw-gradient-stops));
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#000080] to-[#000099];
+}

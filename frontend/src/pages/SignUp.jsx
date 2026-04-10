@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-
+import API_URL from '../config';
 
 export default function SignUp() {
   const [fullname, setFullname] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -35,201 +36,188 @@ export default function SignUp() {
     strengthColor = 'text-red-500';
   } else if (strength === 3 || strength === 4) {
     strengthLabel = 'Medium Password';
-    strengthColor = 'text-yellow-500';
+    strengthColor = 'text-blue-500';
   } else if (strength >= 5) {
     strengthLabel = 'Strong Password';
-    strengthColor = 'text-green-700';
+    strengthColor = 'text-blue-900';
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('Passwords do not match. Please ensure both passwords are identical.');
       return;
     }
+
     try {
-      await axios.post('http://localhost:5000/api/auth/register', { fullname, email, password });
-      setSuccess('Registration successful! Please log in.');
+      await axios.post(`${API_URL}/auth/register`, { fullname, email, phone, password });
+      setSuccess('Profile verification successful! Authenticating...');
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      if (!err.response) {
+        setError('Marketplace connection unavailable. Please check your network or try again later.');
+      } else {
+        setError(err.response?.data?.message || 'Verification failed. Please review your details.');
+      }
     }
   };
 
   return (
-    <main className="min-h-screen grid grid-cols-1 md:grid-cols-2 font-sans">
-      {/* Left Column: Editorial Impact */}
-      <section className="relative hidden md:flex flex-col justify-end p-16 overflow-hidden">
+    <main className="min-h-screen grid grid-cols-1 md:grid-cols-2 font-sans bg-white">
+      {/* Left Column: Dark Navy Editorial Impact */}
+      <section className="relative hidden md:flex flex-col justify-end p-16 overflow-hidden bg-slate-900">
         <div className="absolute inset-0 z-0">
           <img
             alt="Luxury Estate"
-            className="w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3NDNoUiNU1t9WluTWQVvqZybriR8e1vnZjJjL0lkx6M4yZe62SRe7Htq13mwLbKQb6CS94a5Wj969dtIfoP_SYVAUkJGxQIl5ewV4Xvp2p7Wv9D89MIPmZAgbZx39srBTEaMT2TgOj8ynb_Ho4e076l68mMaVqBziCDi5lHxiFdrYfu76ouIM5yQuNdbkPK8qaZrmZnWc1Npe1FpFoP8qYWS0svq-pAMwJhyGG35k5L1aZy_NqQ3VG7fBBKjoUnBuFUDsFJLN2B0S"
+            className="w-full h-full object-cover opacity-40 grayscale"
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-green-900/90 via-green-900/20 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
         </div>
         <div className="relative z-10 space-y-8">
-          <div className="inline-block px-4 py-2 bg-white/10 backdrop-blur-md rounded-lg border border-white/10">
-            <span className="text-white font-bold text-xs tracking-[0.2em] uppercase">Est. 2024</span>
+          <div className="inline-block px-4 py-2 bg-white/5 backdrop-blur-md rounded-lg border border-white/10">
+            <span className="text-white font-black text-xs tracking-[0.3em] uppercase">Est. 2024</span>
           </div>
-          <h1 className="font-black text-6xl text-white leading-[1.1] tracking-tight max-w-xl">
-            Join the World's Most <span className="text-green-200">Extraordinary</span> Marketplace.
+          <h1 className="font-black text-6xl text-white leading-none tracking-tighter max-w-xl uppercase mb-8">
+            Join the World's Most <span className="text-blue-500">Extraordinary</span> Marketplace.
           </h1>
           <div className="flex flex-wrap gap-4 pt-4">
-            <div className="flex items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 px-5 py-3 rounded-xl">
-              <span className="material-symbols-outlined text-yellow-300" style={{fontVariationSettings: '"FILL" 1'}}>verified</span>
+            <div className="flex items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 px-6 py-4 rounded-2xl">
+              <span className="text-blue-500 text-2xl">★</span>
               <div className="flex flex-col">
-                <span className="text-white font-bold text-sm leading-none">12k+</span>
-                <span className="text-white/60 text-[10px] uppercase tracking-wider font-semibold">Verified Listings</span>
+                <span className="text-white font-black text-lg leading-none">12k+</span>
+                <span className="text-white/40 text-[11px] uppercase tracking-widest font-black">Verified Ads</span>
               </div>
             </div>
-            <div className="flex items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 px-5 py-3 rounded-xl">
-              <span className="material-symbols-outlined text-yellow-300" style={{fontVariationSettings: '"FILL" 1'}}>shield_person</span>
+            <div className="flex items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 px-6 py-4 rounded-2xl">
+              <span className="text-blue-500 text-2xl">🛡️</span>
               <div className="flex flex-col">
-                <span className="text-white font-bold text-sm leading-none">Global</span>
-                <span className="text-white/60 text-[10px] uppercase tracking-wider font-semibold">Verified Sellers Only</span>
+                <span className="text-white font-black text-lg leading-none">Global</span>
+                <span className="text-white/40 text-[11px] uppercase tracking-widest font-black">Secure Trade</span>
               </div>
             </div>
           </div>
         </div>
         <div className="absolute top-12 left-12 z-10">
-          <span className="font-black text-2xl text-white uppercase tracking-widest">The Editorial</span>
+           <span className="font-black text-3xl text-white tracking-tighter">THE EDITORIAL.</span>
         </div>
       </section>
+
       {/* Right Column: Sign Up Form */}
       <section className="bg-white flex items-center justify-center p-8 md:p-24 relative overflow-y-auto">
         <div className="w-full max-w-md space-y-10">
-          <div className="space-y-2">
-            <h2 className="font-bold text-3xl text-gray-900 tracking-tight">Create your account</h2>
-            <p className="text-gray-500 font-medium">Access curated collections and exclusive auctions.</p>
+          <div className="text-center md:text-left">
+            <h2 className="font-black text-4xl text-slate-900 tracking-tighter uppercase mb-2">Create Account</h2>
+            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Join our premium community today.</p>
           </div>
-          {/* Social Sign-up */}
-          <div className="grid grid-cols-2 gap-4">
-            <button type="button" className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-all active:scale-95 min-w-0">
-              <img alt="Google" className="w-5 h-5" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
-              <span className="text-base font-semibold text-gray-900">Google</span>
-            </button>
-            <button type="button" className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-all active:scale-95 min-w-0">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16.365 1.43c0 1.14-.93 2.07-2.07 2.07-1.14 0-2.07-.93-2.07-2.07C12.225.29 13.155-.64 14.295-.64c1.14 0 2.07.93 2.07 2.07zm6.09 6.09c0 1.14-.93 2.07-2.07 2.07-1.14 0-2.07-.93-2.07-2.07 0-1.14.93-2.07 2.07-2.07 1.14 0 2.07.93 2.07 2.07zm-6.09 6.09c0 1.14-.93 2.07-2.07 2.07-1.14 0-2.07-.93-2.07-2.07 0-1.14.93-2.07 2.07-2.07 1.14 0 2.07.93 2.07 2.07zm6.09 6.09c0 1.14-.93 2.07-2.07 2.07-1.14 0-2.07-.93-2.07-2.07 0-1.14.93-2.07 2.07-2.07 1.14 0 2.07.93 2.07 2.07z" fill="#000"/>
-              </svg>
-              <span className="text-base font-semibold text-gray-900">Apple</span>
-            </button>
-          </div>
-          <div className="relative flex items-center gap-4">
-            <div className="flex-grow h-px bg-gray-200"></div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Or with email</span>
-            <div className="flex-grow h-px bg-gray-200"></div>
-          </div>
-          {/* Form */}
-          {error && <div className="mb-4 text-red-500">{error}</div>}
-          {success && <div className="mb-4 text-green-600">{success}</div>}
+
+          {error && <div className="p-4 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-100 uppercase tracking-wider">{error}</div>}
+          {success && <div className="p-4 bg-blue-50 text-blue-900 text-xs font-bold rounded-xl border border-blue-100 uppercase tracking-wider">{success}</div>}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 px-1" htmlFor="fullname">Full Name</label>
+                <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1" htmlFor="fullname">Full Name</label>
                 <input
-                  className="w-full px-5 py-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-green-700/40 text-gray-900 placeholder:text-gray-400 font-medium transition-all"
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 text-slate-900 placeholder:text-slate-300 font-bold transition-all outline-none"
                   id="fullname"
-                  name="fullname"
-                  placeholder="Alexander Sterling"
+                  placeholder="John Doe"
                   type="text"
                   value={fullname}
                   onChange={e => setFullname(e.target.value)}
                   required
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 px-1" htmlFor="email">Email Address</label>
-                <input
-                  className="w-full px-5 py-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-green-700/40 text-gray-900 placeholder:text-gray-400 font-medium transition-all"
-                  id="email"
-                  name="email"
-                  placeholder="alexander@editorial.com"
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  required
-                />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1" htmlFor="email">Email</label>
+                  <input
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 text-slate-900 placeholder:text-slate-300 font-bold transition-all outline-none"
+                    id="email"
+                    placeholder="name@mail.com"
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1" htmlFor="password">Password</label>
+                  <input
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 text-slate-900 placeholder:text-slate-300 font-bold transition-all outline-none"
+                    id="phone"
+                    placeholder="+1 234 567 890"
+                    type="tel"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                  />
+                </div>
               </div>
+
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 px-1" htmlFor="password">Password</label>
+                <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1" htmlFor="password">Password</label>
                 <div className="relative">
                   <input
-                    className="w-full px-5 py-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-green-700/40 text-gray-900 placeholder:text-gray-400 font-medium transition-all"
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 text-slate-900 placeholder:text-slate-300 font-bold transition-all outline-none"
                     id="password"
-                    name="password"
                     placeholder="••••••••"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     required
                   />
-                  <span
-                    className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 cursor-pointer select-none"
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-blue-900 transition"
                     onClick={() => setShowPassword((v) => !v)}
-                    title={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? 'visibility_off' : 'visibility'}
-                  </span>
+                    {showPassword ? '👁️' : '🕶️'}
+                  </button>
                 </div>
-                {/* Strength Meter (dynamic) */}
-                <div className="flex gap-1 pt-1 px-1">
-                  <div className={`h-1 flex-grow rounded-full ${strength > 0 ? (strength <= 2 ? 'bg-red-500' : strength <= 4 ? 'bg-yellow-500' : 'bg-green-700') : 'bg-gray-200'}`}></div>
-                  <div className={`h-1 flex-grow rounded-full ${strength > 1 ? (strength <= 2 ? 'bg-red-500' : strength <= 4 ? 'bg-yellow-500' : 'bg-green-700') : 'bg-gray-200'}`}></div>
-                  <div className={`h-1 flex-grow rounded-full ${strength > 2 ? (strength <= 4 ? 'bg-yellow-500' : 'bg-green-700') : 'bg-gray-200'}`}></div>
-                  <div className={`h-1 flex-grow rounded-full ${strength > 4 ? 'bg-green-700' : 'bg-gray-200'}`}></div>
+                <div className="flex gap-1 pt-2 px-1">
+                   <div className={`h-1 flex-grow rounded-full ${strength > 0 ? (strength <= 2 ? 'bg-red-400' : strength <= 4 ? 'bg-blue-400' : 'bg-blue-900') : 'bg-slate-100'}`}></div>
+                   <div className={`h-1 flex-grow rounded-full ${strength > 1 ? (strength <= 2 ? 'bg-red-400' : strength <= 4 ? 'bg-blue-400' : 'bg-blue-900') : 'bg-slate-100'}`}></div>
+                   <div className={`h-1 flex-grow rounded-full ${strength > 2 ? (strength <= 4 ? 'bg-blue-400' : 'bg-blue-900') : 'bg-slate-100'}`}></div>
+                   <div className={`h-1 flex-grow rounded-full ${strength > 4 ? 'bg-blue-900' : 'bg-slate-100'}`}></div>
                 </div>
-                {strengthLabel && (
-                  <p className={`text-[10px] font-bold px-1 uppercase tracking-tighter ${strengthColor}`}>{strengthLabel}</p>
-                )}
+                {strengthLabel && <p className={`text-[9px] font-black uppercase tracking-widest mt-1 ${strengthColor}`}>{strengthLabel}</p>}
               </div>
+
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 px-1" htmlFor="confirm-password">Confirm Password</label>
-                <div className="relative">
-                  <input
-                    className="w-full px-5 py-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-green-700/40 text-gray-900 placeholder:text-gray-400 font-medium transition-all"
-                    id="confirm-password"
-                    name="confirm-password"
-                    placeholder="••••••••"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                  <span
-                    className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 cursor-pointer select-none"
-                    onClick={() => setShowConfirmPassword((v) => !v)}
-                    title={showConfirmPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showConfirmPassword ? 'visibility_off' : 'visibility'}
-                  </span>
-                </div>
+                <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1" htmlFor="confirm-password">Confirm Password</label>
+                <input
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 text-slate-900 placeholder:text-slate-300 font-bold transition-all outline-none"
+                  id="confirm-password"
+                  placeholder="••••••••"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  required
+                />
               </div>
             </div>
-            <div className="pt-2">
-              <button type="submit" className="w-full bg-gradient-to-r from-green-700 to-green-500 py-4 rounded-xl text-white font-bold text-base tracking-tight shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
-                Create Account
-              </button>
-            </div>
-            <p className="text-[11px] text-center leading-relaxed text-gray-400 font-medium px-4">
-              By signing up, you agree to our{' '}
-              <a className="text-green-700 font-bold hover:underline" href="#">Terms of Service</a> and{' '}
-              <a className="text-green-700 font-bold hover:underline" href="#">Privacy Policy</a>.
+
+            <button type="submit" className="w-full bg-slate-900 hover:bg-blue-900 text-white font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-sm shadow-xl transition-all active:scale-95">
+               Create Secure Account
+            </button>
+
+            <p className="text-xs text-center text-slate-400 font-bold uppercase tracking-widest px-8 leading-loose">
+              By joining, you agree to our{' '}
+              <a className="text-blue-900 hover:underline" href="#">Terms</a> &{' '}
+              <a className="text-blue-900 hover:underline" href="#">Privacy Policy</a>.
             </p>
           </form>
-          <div className="pt-8 border-t border-gray-200 flex justify-center">
-            <p className="text-sm font-medium text-gray-500">
-              Already have an account?{' '}
-              <Link className="text-green-700 font-bold hover:text-green-800 transition-colors" to="/login">Log In</Link>
+
+          <div className="pt-8 border-t border-slate-50 text-center">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              Already a member?{' '}
+              <Link className="text-blue-900 font-black hover:text-blue-700 transition" to="/login">Sign In</Link>
             </p>
           </div>
-        </div>
-        {/* Decorative Element */}
-        <div className="absolute bottom-8 right-8 pointer-events-none opacity-5 select-none">
-          <span className="font-black text-8xl uppercase leading-none tracking-tighter text-gray-900">EDTL</span>
         </div>
       </section>
     </main>
