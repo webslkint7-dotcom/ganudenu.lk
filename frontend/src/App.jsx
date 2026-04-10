@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
@@ -21,6 +21,7 @@ import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
 
 function App() {
+  const location = useLocation();
   const isAuthenticated = !!localStorage.getItem('token');
   const isAdmin = isAuthenticated && localStorage.getItem('role') === 'ADMIN';
   
