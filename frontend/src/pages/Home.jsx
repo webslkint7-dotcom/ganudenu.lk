@@ -73,6 +73,51 @@ export default function Home() {
         </div>
       </section>
 
+      {/* How it Work Section */}
+      <section className="py-24 bg-[#F8F9FA]">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold text-navy mb-16">How it Work</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Step 01 */}
+            <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-left relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+              <div className="absolute top-6 right-8 text-7xl font-bold text-slate-50 group-hover:text-slate-100 transition-colors">01</div>
+              <div className="w-14 h-14 rounded-xl bg-red-50 flex items-center justify-center mb-8">
+                <span className="text-3xl">👤</span>
+              </div>
+              <h3 className="text-xl font-bold text-navy mb-4">Create Account</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Donec non lorem erat. Sed vitae vene.
+              </p>
+            </div>
+
+            {/* Step 02 */}
+            <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-left relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+              <div className="absolute top-6 right-8 text-7xl font-bold text-slate-50 group-hover:text-slate-100 transition-colors">02</div>
+              <div className="w-14 h-14 rounded-xl bg-orange-50 flex items-center justify-center mb-8">
+                <span className="text-3xl">📋</span>
+              </div>
+              <h3 className="text-xl font-bold text-navy mb-4">Post a Ads</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu aliquet odio. Nulla pretium congue eros, nec rhoncus mi.
+              </p>
+            </div>
+
+            {/* Step 03 */}
+            <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-left relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+              <div className="absolute top-6 right-8 text-7xl font-bold text-slate-50 group-hover:text-slate-100 transition-colors">03</div>
+              <div className="w-14 h-14 rounded-xl bg-green-50 flex items-center justify-center mb-8">
+                <span className="text-3xl">📦</span>
+              </div>
+              <h3 className="text-xl font-bold text-navy mb-4">Start Earning</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Vestibulum quis consectetur est. Fusce hendrerit neque at facilisis facilisis. Praesent a pretium elit. Nulla aliquam puru.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Fresh recommended ads */}
       <section id="recommended-ads" className="py-24 bg-white scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6">
@@ -132,51 +177,6 @@ export default function Home() {
             <Link to="/all-ads" className="inline-flex items-center gap-2 bg-navy hover:bg-navy-light text-white px-8 py-3.5 rounded-lg font-semibold transition shadow-lg shadow-navy/20 active:scale-95">
               View Ads <span className="text-lg">→</span>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* How it Work Section */}
-      <section className="py-24 bg-[#F8F9FA]">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-navy mb-16">How it Work</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Step 01 */}
-            <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-left relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-              <div className="absolute top-6 right-8 text-7xl font-bold text-slate-50 group-hover:text-slate-100 transition-colors">01</div>
-              <div className="w-14 h-14 rounded-xl bg-red-50 flex items-center justify-center mb-8">
-                <span className="text-3xl">👤</span>
-              </div>
-              <h3 className="text-xl font-bold text-navy mb-4">Create Account</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Donec non lorem erat. Sed vitae vene.
-              </p>
-            </div>
-
-            {/* Step 02 */}
-            <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-left relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-              <div className="absolute top-6 right-8 text-7xl font-bold text-slate-50 group-hover:text-slate-100 transition-colors">02</div>
-              <div className="w-14 h-14 rounded-xl bg-orange-50 flex items-center justify-center mb-8">
-                <span className="text-3xl">📋</span>
-              </div>
-              <h3 className="text-xl font-bold text-navy mb-4">Post a Ads</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu aliquet odio. Nulla pretium congue eros, nec rhoncus mi.
-              </p>
-            </div>
-
-            {/* Step 03 */}
-            <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-left relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-              <div className="absolute top-6 right-8 text-7xl font-bold text-slate-50 group-hover:text-slate-100 transition-colors">03</div>
-              <div className="w-14 h-14 rounded-xl bg-green-50 flex items-center justify-center mb-8">
-                <span className="text-3xl">📦</span>
-              </div>
-              <h3 className="text-xl font-bold text-navy mb-4">Start Earning</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Vestibulum quis consectetur est. Fusce hendrerit neque at facilisis facilisis. Praesent a pretium elit. Nulla aliquam puru.
-              </p>
-            </div>
           </div>
         </div>
       </section>

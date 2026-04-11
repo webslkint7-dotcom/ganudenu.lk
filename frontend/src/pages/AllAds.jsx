@@ -65,135 +65,131 @@ export default function AllAds() {
     <div className="bg-[#f5f7fa] min-h-screen font-sans">
       <Navbar isAuthenticated={!!localStorage.getItem('token')} />
 
-      <section className="bg-slate-950 py-32 text-white relative overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950 to-slate-950 z-10"></div>
-          <img 
-            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80" 
-            className="w-full h-full object-cover opacity-30 fixed"
-            alt="Global Network"
-          />
-        </div>
+      <section className="bg-[#000033] py-24 lg:py-32 text-white relative overflow-hidden">
+        {/* Modern Abstract Background Elements */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] -mr-64 -mt-64 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] -ml-48 -mb-48"></div>
+        
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="max-w-3xl">
-            <h1 className="text-5xl lg:text-8xl font-black mb-8 uppercase tracking-tighter text-white leading-[0.9]">
-              Find Everything <br/> <span className="text-blue-600">Everywhere.</span>
+            <h1 className="text-5xl lg:text-7xl font-black mb-6 uppercase tracking-tighter text-white leading-none">
+              Explore Our <br/> <span className="text-blue-500">Premium Marketplace</span>
             </h1>
-            <p className="text-slate-400 text-lg font-medium max-w-xl mb-10 leading-relaxed capitalize">
-              Discover the most curated selection of properties and high-performance vehicles across Sri Lanka's premier marketplace.
+            <p className="text-slate-300 text-lg font-medium max-w-xl mb-10 leading-relaxed">
+              Find the perfect match from our curated collection of luxury properties and high-performance vehicles across Sri Lanka.
             </p>
             <div className="flex items-center gap-6">
                <div className="flex -space-x-3">
-                  {[1,2,3,4].map(i => <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-950 bg-slate-800 flex items-center justify-center text-[10px] font-black">U{i}</div>)}
+                  {[1,2,3,4].map(i => <div key={i} className="w-10 h-10 rounded-full border-2 border-[#000033] bg-slate-800 flex items-center justify-center text-[10px] font-black">U{i}</div>)}
                </div>
-               <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Trusted by <span className="text-white">50k+</span> Active Traders</p>
+               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Trusted by <span className="text-white font-bold">50k+</span> Active Traders</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-6 -mt-16 relative z-20">
-        <div className="bg-white p-4 rounded-[3rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.2)] border border-slate-100 flex flex-col lg:flex-row gap-4 items-stretch">
+      <section className="max-w-7xl mx-auto px-6 -mt-12 relative z-20">
+        <div className="bg-white/80 backdrop-blur-2xl p-4 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/50 flex flex-col lg:flex-row gap-4 items-stretch">
           
-          <div className="flex-[2] flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-slate-100 bg-slate-50/50 rounded-[2rem] border border-slate-100 overflow-hidden">
+          <div className="flex-[3] flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-slate-100 bg-slate-50/50 rounded-[2rem] border border-slate-100 overflow-hidden">
              {/* Key Search */}
-             <div className="flex-1 px-8 py-5 flex items-center gap-4 group">
-                <span className="text-xl opacity-20 group-focus-within:opacity-100 transition-opacity">🔍</span>
+             <div className="flex-1 px-8 py-4 flex items-center gap-4 group">
+                <span className="text-lg opacity-40 group-focus-within:opacity-100 transition-opacity">🔍</span>
                 <div className="flex flex-col flex-1">
                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-blue-600 transition">Keywords</label>
                    <input 
                       type="text" 
-                      placeholder="BMW M4, Modern Villa..." 
-                      className="bg-transparent border-none text-xs font-black text-slate-900 outline-none placeholder-slate-300 uppercase tracking-widest"
+                      placeholder="e.g. BMW M4, Luxury Villa..." 
+                      className="bg-transparent border-none text-[11px] font-bold text-slate-900 outline-none placeholder-slate-300 uppercase tracking-wider"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                    />
                 </div>
              </div>
              {/* Location */}
-             <div className="flex-1 px-8 py-5 flex items-center gap-4 group relative">
-                <span className="text-xl opacity-20 group-focus-within:opacity-100 transition-opacity">📍</span>
+             <div className="flex-1 px-8 py-4 flex items-center gap-4 group relative">
+                <span className="text-lg opacity-40 group-focus-within:opacity-100 transition-opacity">📍</span>
                 <div className="flex flex-col flex-1">
                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-blue-600 transition">Location</label>
                    <select 
-                      className="bg-transparent border-none text-xs font-black text-slate-900 outline-none appearance-none cursor-pointer uppercase tracking-widest pr-10"
+                      className="bg-transparent border-none text-[11px] font-bold text-slate-900 outline-none appearance-none cursor-pointer uppercase tracking-wider pr-10"
                       value={locationFilter}
                       onChange={(e) => setLocationFilter(e.target.value)}
                    >
-                      <option value="All">Across All Regions</option>
+                      <option value="All">All Regions</option>
                       {SRI_LANKA_DISTRICTS.map(loc => <option key={loc} value={loc}>{loc}</option>)}
                    </select>
                 </div>
-                <div className="absolute right-8 pointer-events-none opacity-20 underline-offset-4">⌄</div>
+                <div className="absolute right-8 pointer-events-none opacity-40">⌄</div>
              </div>
           </div>
 
-          <button className="bg-blue-700 hover:bg-blue-600 text-white font-black px-12 py-6 rounded-[2rem] uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-blue-700/20 transition active:scale-95 flex items-center justify-center gap-3">
-             Update Listings <span>→</span>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white font-black px-10 py-5 rounded-[1.8rem] uppercase tracking-widest text-[10px] shadow-xl shadow-blue-600/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3">
+             Search Now
           </button>
         </div>
       </section>
 
       <main className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-4 gap-12">
-        <aside className="space-y-8">
-          <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-50">
-            <h3 className="text-xs font-black uppercase tracking-[0.3em] mb-8 text-slate-400">Categories</h3>
-            <div className="space-y-4">
+        <aside className="space-y-6">
+          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100/50">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-slate-400">Categories</h3>
+            <div className="space-y-2">
               {['All', 'Properties', 'Vehicles'].map(cat => (
                 <button 
                   key={cat}
                   onClick={() => handleCategoryChange(cat)}
-                  className={`w-full text-left flex justify-between items-center group transition-colors ${categoryFilter === cat ? 'text-navy' : 'text-slate-400'}`}
+                  className={`w-full text-left flex justify-between items-center px-4 py-3 rounded-xl transition-all ${categoryFilter === cat ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'}`}
                 >
-                  <span className="text-xs font-black uppercase tracking-widest group-hover:text-navy transition">{cat}</span>
-                  {categoryFilter === cat && <span className="w-2 h-2 bg-navy rounded-full"></span>}
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{cat}</span>
+                  {categoryFilter === cat && <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>}
                 </button>
               ))}
             </div>
           </div>
 
           {categoryFilter !== 'All' && subCategoriesMap[categoryFilter] && (
-            <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-50 animate-in fade-in slide-in-from-top-4 duration-300">
-              <h3 className="text-xs font-black uppercase tracking-[0.3em] mb-8 text-slate-400">Sub Categories</h3>
-              <div className="space-y-4">
+            <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100/50 animate-in fade-in slide-in-from-top-4 duration-300">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-slate-400">Sub Categories</h3>
+              <div className="space-y-2">
                 <button 
-                  onClick={() => setSubcategoryFilter('All')}
-                  className={`w-full text-left flex justify-between items-center group transition-colors ${subcategoryFilter === 'All' ? 'text-navy' : 'text-slate-400'}`}
+                   onClick={() => setSubcategoryFilter('All')}
+                   className={`w-full text-left flex justify-between items-center px-4 py-3 rounded-xl transition-all ${subcategoryFilter === 'All' ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'}`}
                 >
-                  <span className="text-xs font-black uppercase tracking-widest group-hover:text-navy transition">All Types</span>
-                  {subcategoryFilter === 'All' && <span className="w-2 h-2 bg-navy rounded-full"></span>}
+                  <span className="text-[11px] font-bold uppercase tracking-wider">All Types</span>
+                  {subcategoryFilter === 'All' && <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>}
                 </button>
                 {subCategoriesMap[categoryFilter].map(sub => (
                   <button 
                     key={sub}
                     onClick={() => setSubcategoryFilter(sub)}
-                    className={`w-full text-left flex justify-between items-center group transition-colors ${subcategoryFilter === sub ? 'text-navy' : 'text-slate-400'}`}
+                    className={`w-full text-left flex justify-between items-center px-4 py-3 rounded-xl transition-all ${subcategoryFilter === sub ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'}`}
                   >
-                    <span className="text-xs font-black uppercase tracking-widest group-hover:text-navy transition">{sub}</span>
-                    {subcategoryFilter === sub && <span className="w-2 h-2 bg-navy rounded-full"></span>}
+                    <span className="text-[11px] font-bold uppercase tracking-wider">{sub}</span>
+                    {subcategoryFilter === sub && <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-50">
-            <h3 className="text-xs font-black uppercase tracking-[0.3em] mb-8 text-slate-400">Price Range</h3>
-            <div className="space-y-4">
-               <div className="flex gap-2">
-                  <input type="number" placeholder="Min" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-black outline-none focus:border-navy transition" value={priceRange.min} onChange={(e) => setPriceRange({...priceRange, min: e.target.value})} />
-                  <input type="number" placeholder="Max" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-black outline-none focus:border-navy transition" value={priceRange.max} onChange={(e) => setPriceRange({...priceRange, max: e.target.value})} />
+          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100/50">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-slate-400">Price Range</h3>
+            <div className="space-y-3">
+               <div className="grid grid-cols-2 gap-2">
+                  <input type="number" placeholder="Min" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition" value={priceRange.min} onChange={(e) => setPriceRange({...priceRange, min: e.target.value})} />
+                  <input type="number" placeholder="Max" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition" value={priceRange.max} onChange={(e) => setPriceRange({...priceRange, max: e.target.value})} />
                </div>
             </div>
           </div>
 
-          <div className="bg-blue-900 rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#000033] to-blue-900 rounded-[2rem] p-8 text-white shadow-xl relative overflow-hidden">
              <div className="relative z-10">
-                <h4 className="text-xl font-black mb-4 uppercase leading-tight">Post Your Ad Fast & Secure</h4>
-                <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-8 leading-relaxed">Reach millions of potential buyers today.</p>
-                <Link to="/post-ad" className="inline-block bg-white text-blue-900 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-50 transition shadow-lg">Get Started →</Link>
+                <h4 className="text-lg font-black mb-3 uppercase leading-tight tracking-tight">Post Your Ad Fast & Secure</h4>
+                <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-6 leading-relaxed">Reach millions of potential buyers today.</p>
+                <Link to="/post-ad" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 transition shadow-lg w-full text-center">Get Started →</Link>
              </div>
-             <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+             <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
           </div>
         </aside>
 
@@ -208,48 +204,47 @@ export default function AllAds() {
              </div>
           ) : (
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-               {filteredListings.map(item => (
-                  <div key={item._id} className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group border border-slate-100 flex flex-col">
-                     <div className="relative h-64 overflow-hidden">
+                {filteredListings.map(item => (
+                  <Link key={item._id} to={item.type === 'VEHICLE' ? `/vehicle/${item._id}` : `/property/${item._id}`} className="bg-white rounded-2xl overflow-hidden shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-300 group border border-slate-100 flex flex-col hover:-translate-y-1">
+                     <div className="relative h-56 overflow-hidden">
                         <img 
                           src={resolveImageUrl(item.image)} 
                           alt={item.title} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                         />
-                        <div className="absolute top-6 left-6 flex flex-col gap-2">
+                        <div className="absolute top-4 left-4 flex flex-col gap-2">
                            {item.isFeatured && (
-                             <span className="bg-blue-600 text-white text-[8px] font-black px-4 py-2 rounded-full uppercase tracking-[0.2em] shadow-2xl flex items-center gap-2">
-                               <span className="w-1.5 h-1.5 bg-white rounded-full animate-blink"></span> PRO BOOST
+                             <span className="bg-blue-600 text-white text-[8px] font-black px-3 py-1.5 rounded-full uppercase tracking-wider shadow-lg flex items-center gap-1.5">
+                               <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> PRO BOOST
                              </span>
                            )}
-                           <span className="bg-white/90 backdrop-blur-md text-slate-900 text-[8px] font-black px-4 py-2 rounded-full uppercase tracking-[0.2em] shadow-lg w-fit">
+                           <span className="bg-white/90 backdrop-blur-md text-slate-900 text-[8px] font-black px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm w-fit">
                              {item.subcategory || item.propertyType || item.category}
                            </span>
                         </div>
-                        <div className="absolute bottom-6 left-6 right-6">
-                           <div className="bg-slate-950/20 backdrop-blur-3xl text-white px-5 py-3 rounded-2xl border border-white/10 flex justify-between items-center translate-y-20 group-hover:translate-y-0 transition-transform duration-500">
-                              <span className="text-[9px] font-black uppercase tracking-widest">{item.location}</span>
-                              <span className="text-xs font-black">LKR {item.price?.toLocaleString()}</span>
-                           </div>
+                     </div>
+                     <div className="p-5 flex-1 flex flex-col">
+                        <div className="flex items-center gap-1.5 text-slate-500 text-[11px] mb-3 font-semibold">
+                          <span className="text-xs">📍</span> {item.location || 'All over Sri Lanka'}
+                        </div>
+                        <h3 className="font-bold text-slate-900 text-base mb-4 line-clamp-2 leading-snug group-hover:text-blue-600 transition truncate uppercase tracking-tight">
+                          {item.title}
+                        </h3>
+                        <div className="mt-auto pt-4 border-t border-slate-50 flex justify-between items-center">
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-1.5 text-slate-400 text-[10px] mb-2 font-bold uppercase tracking-widest">
+                              <span>🛠️</span> {item.subcategory || item.propertyType || item.category}
+                            </div>
+                            <div className="text-red-600 font-bold text-lg flex items-center tracking-tight">
+                              <span className="text-[10px] mr-1">LKR</span>{item.price?.toLocaleString()}
+                            </div>
+                          </div>
+                          <div className="w-8 h-8 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all">
+                            ➜
+                          </div>
                         </div>
                      </div>
-                     <div className="p-8 flex-1 flex flex-col bg-white">
-                        <div className="flex justify-between items-start mb-4">
-                           <h3 className="font-black text-slate-900 text-lg uppercase tracking-tight group-hover:text-blue-700 transition leading-tight line-clamp-2 pr-4">{item.title}</h3>
-                        </div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-8 line-clamp-2 leading-relaxed">
-                           {item.description?.substring(0, 100)}...
-                        </p>
-                        <div className="mt-auto pt-6 border-t border-slate-50 flex justify-between items-center">
-                           <div className="flex items-center gap-2 text-[10px] font-black text-blue-700 uppercase tracking-widest">
-                              <span className="w-2 h-2 rounded-full bg-blue-700"></span> Live Ad
-                           </div>
-                           <Link to={item.type === 'VEHICLE' ? `/vehicle/${item._id}` : `/property/${item._id}`} className="text-[10px] font-black uppercase tracking-[0.3em] hover:text-blue-700 transition flex items-center gap-2">
-                              View Details <span>→</span>
-                           </Link>
-                        </div>
-                     </div>
-                  </div>
+                  </Link>
                ))}
               </div>
           )}
