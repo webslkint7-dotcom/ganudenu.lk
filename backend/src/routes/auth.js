@@ -38,6 +38,7 @@ router.post('/register', async (req, res) => {
         _id: user._id,
         fullname: user.fullname,
         email: user.email,
+        phone: user.phone,
         role: user.role,
       }
     });
@@ -69,6 +70,7 @@ router.post('/login', async (req, res) => {
         _id: user._id,
         fullname: user.fullname,
         email: user.email,
+        phone: user.phone,
         role: user.role,
       }
     });
@@ -97,7 +99,7 @@ router.get('/me', async (req, res) => {
 });
 
 router.put('/me', auth, async (req, res) => {
-  const { fullname, email, bio, location } = req.body;
+  const { fullname, email, phone, bio, location } = req.body;
 
   try {
     if (email && email !== req.user.email) {
@@ -107,8 +109,16 @@ router.put('/me', auth, async (req, res) => {
       }
     }
 
+    if (phone && phone !== req.user.phone) {
+      const existingPhoneUser = await User.findOne({ phone });
+      if (existingPhoneUser && existingPhoneUser._id.toString() !== req.user._id.toString()) {
+        return res.status(400).json({ message: 'A user with this phone already exists.' });
+      }
+    }
+
     req.user.fullname = fullname ?? req.user.fullname;
     req.user.email = email ?? req.user.email;
+    req.user.phone = phone ?? req.user.phone;
     req.user.bio = bio ?? req.user.bio;
     req.user.location = location ?? req.user.location;
 
@@ -118,6 +128,7 @@ router.put('/me', auth, async (req, res) => {
       _id: req.user._id,
       fullname: req.user.fullname,
       email: req.user.email,
+      phone: req.user.phone,
       role: req.user.role,
       bio: req.user.bio,
       location: req.user.location,
@@ -126,6 +137,43 @@ router.put('/me', auth, async (req, res) => {
   } catch (err) {
     console.error('SERVER: Profile Update Error:', err);
     res.status(500).json({ message: 'Internal Server Error during profile update. Please try again later.' });
+  }
+});
+
+router.put('/change-password', auth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'Current password and new password are required.' });
+  }
+
+  if (String(newPassword).length < 8) {
+    return res.status(400).json({ message: 'New password must be at least 8 characters long.' });
+  }
+
+  try {
+    const userWithPassword = await User.findById(req.user._id);
+    if (!userWithPassword) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const matches = await bcrypt.compare(currentPassword, userWithPassword.password);
+    if (!matches) {
+      return res.status(400).json({ message: 'Current password is incorrect.' });
+    }
+
+    const sameAsCurrent = await bcrypt.compare(newPassword, userWithPassword.password);
+    if (sameAsCurrent) {
+      return res.status(400).json({ message: 'New password must be different from the current password.' });
+    }
+
+    userWithPassword.password = await bcrypt.hash(newPassword, 10);
+    await userWithPassword.save();
+
+    return res.json({ message: 'Password updated successfully.' });
+  } catch (err) {
+    console.error('SERVER: Change Password Error:', err);
+    return res.status(500).json({ message: 'Internal Server Error during password update. Please try again later.' });
   }
 });
 

@@ -3,60 +3,66 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
-    <footer className="bg-navy pt-24 pb-12 text-white border-t-8 border-navy-light">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
+    <footer className="bg-[#1C1D22] text-white pt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-white/10">
         <div>
-          <div className="mb-8">
-            <span className="text-3xl font-black text-blue-500 tracking-tighter">THE</span>
-            <span className="text-3xl font-black text-white tracking-tighter uppercase">EDITORIAL</span>
-          </div>
-          <p className="text-slate-400 text-sm leading-relaxed mb-8 opacity-70 font-medium">
-            The world's largest classified listing marketplace where performance meets luxury. Join millions of users today.
+          <h3 className="text-[28px] font-extrabold tracking-tight text-white">ganudenu.lk</h3>
+          <p className="text-[#A0A5AF] text-sm leading-6 mt-4">
+            A modern classified marketplace for property, vehicles, electronics, and services across Sri Lanka.
           </p>
-          <div className="flex gap-4">
-            {['f', 't', 'i', 'y'].map(s => (
-              <div key={s} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-blue-700 transition cursor-pointer font-black text-xs">{s.toUpperCase()}</div>
+          <div className="flex items-center gap-2 mt-6">
+            {['F', 'X', 'I', 'Y'].map((item) => (
+              <span key={item} className="w-8 h-8 rounded-sm bg-white/10 hover:bg-[#0B1F5E] transition inline-flex items-center justify-center text-xs font-bold cursor-pointer">
+                {item}
+              </span>
             ))}
           </div>
         </div>
-        
+
         <div>
-          <h4 className="text-sm font-black uppercase tracking-[0.2em] mb-8 bg-navy-light/30 inline-block px-4 py-2 rounded-lg text-white">How to Sell Fast</h4>
-          <ul className="space-y-3 text-slate-400 text-sm font-black uppercase tracking-widest leading-loose">
-            <li className="hover:text-blue-400 cursor-pointer transition">Selling Tips</li>
-            <li className="hover:text-blue-400 cursor-pointer transition">Membership</li>
-            <li className="hover:text-blue-400 cursor-pointer transition">Banner Advertising</li>
-            <li className="hover:text-blue-400 cursor-pointer transition">Promote Your Ad</li>
+          <h4 className="text-sm font-bold uppercase tracking-[0.12em] mb-4 text-white">Contact Details</h4>
+          <ul className="space-y-2 text-sm text-[#A7ADB8]">
+            <li>15 Flower Street, Colombo</li>
+            <li>+94 71 234 5678</li>
+            <li>admin@ganudenu.lk</li>
           </ul>
         </div>
 
         <div>
-          <h4 className="text-sm font-black uppercase tracking-[0.2em] mb-8 bg-navy-light/30 inline-block px-4 py-2 rounded-lg text-white">Information</h4>
-          <ul className="space-y-3 text-slate-400 text-sm font-black uppercase tracking-widest leading-loose">
-            <li className="hover:text-blue-400 cursor-pointer transition">Company Contact</li>
-            <li className="hover:text-blue-400 cursor-pointer transition">Blog & Articles</li>
-            <li className="hover:text-blue-400 cursor-pointer transition">Terms of Service</li>
-            <li className="hover:text-blue-400 cursor-pointer transition">Privacy Policy</li>
+          <h4 className="text-sm font-bold uppercase tracking-[0.12em] mb-4 text-white">Quick Links</h4>
+          <ul className="space-y-2 text-sm text-[#A7ADB8]">
+            <li><Link to="/all-ads" className="hover:text-[#0B1F5E] transition">All Ads</Link></li>
+            <li><Link to="/post-ad" className="hover:text-[#0B1F5E] transition">Add Post</Link></li>
+            <li><Link to="/messages" className="hover:text-[#0B1F5E] transition">Messages</Link></li>
+            <li><Link to="/contact" className="hover:text-[#0B1F5E] transition">Contact Us</Link></li>
+            <li><Link to="/faq" className="hover:text-[#0B1F5E] transition">FAQ</Link></li>
           </ul>
         </div>
 
         <div>
-          <h4 className="text-sm font-black uppercase tracking-[0.2em] mb-8 bg-navy-light/30 inline-block px-4 py-2 rounded-lg text-white">Help & Support</h4>
-          <ul className="space-y-3 text-slate-400 text-sm font-black uppercase tracking-widest leading-loose">
-            <li className="hover:text-blue-400 cursor-pointer transition">Live Chat</li>
-            <li><Link to="/faq" className="hover:text-blue-400 transition">FAQ</Link></li>
-            <li className="hover:text-blue-400 cursor-pointer transition">How to Stay Safe</li>
-            <li><Link to="/contact" className="hover:text-blue-400 transition">Contact Us</Link></li>
-          </ul>
+          <h4 className="text-sm font-bold uppercase tracking-[0.12em] mb-4 text-white">Newsletter</h4>
+          <p className="text-sm text-[#A7ADB8] mb-3">Get market updates and new listing alerts every week.</p>
+          <form className="flex">
+            <input
+              type="email"
+              placeholder="Your email"
+              className="h-10 px-3 bg-white/10 border border-white/20 text-sm w-full focus:outline-none focus:border-[#0B1F5E]"
+            />
+            <button
+              type="button"
+              className="h-10 px-4 bg-[#0B1F5E] text-white text-sm font-semibold hover:bg-[#081742] transition"
+            >
+              Send
+            </button>
+          </form>
         </div>
       </div>
-      
-      <div className="max-w-7xl mx-auto px-6 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-        <p className="text-xs font-black text-slate-500 tracking-[0.3em] uppercase">© Copyright 2024 Editorial. All rights reserved.</p>
-        <div className="flex gap-4 grayscale opacity-20">
-          <div className="w-12 h-6 bg-white/20 rounded"></div>
-          <div className="w-12 h-6 bg-white/20 rounded"></div>
-          <div className="w-12 h-6 bg-white/20 rounded"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#8A919D]">
+        <p>Copyright 2026 ganudenu.lk. All rights reserved.</p>
+        <div className="flex items-center gap-5">
+          <Link to="/contact" className="hover:text-[#0B1F5E] transition">Contact</Link>
+          <Link to="/faq" className="hover:text-[#0B1F5E] transition">Help</Link>
         </div>
       </div>
     </footer>

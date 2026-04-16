@@ -82,7 +82,7 @@ router.get('/', async (req, res) => {
   try {
     const listings = await Listing.find(query)
       .sort({ isFeatured: -1, createdAt: -1 })
-      .populate('owner', 'fullname');
+      .populate('owner', 'fullname phone');
     res.json(listings);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -102,7 +102,7 @@ router.get('/featured', async (req, res) => {
 // Get the authenticated user's listings
 router.get('/mine', auth, async (req, res) => {
   try {
-    const listings = await Listing.find({ owner: req.user.id }).sort({ createdAt: -1 }).populate('owner', 'fullname email');
+    const listings = await Listing.find({ owner: req.user.id }).sort({ createdAt: -1 }).populate('owner', 'fullname email phone');
     res.json(listings);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -112,7 +112,7 @@ router.get('/mine', auth, async (req, res) => {
 // Get listing by ID
 router.get('/:id', async (req, res) => {
   try {
-    const listing = await Listing.findById(req.params.id).populate('owner', 'fullname email');
+    const listing = await Listing.findById(req.params.id).populate('owner', 'fullname email phone');
     if (!listing) return res.status(404).json({ message: 'Listing not found' });
     res.json(listing);
   } catch (err) {

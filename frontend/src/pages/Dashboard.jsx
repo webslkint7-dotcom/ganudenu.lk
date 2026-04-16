@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import API from '../api';
 import { resolveImageUrl } from '../utils/imageUrl';
 
@@ -54,128 +55,148 @@ export default function Dashboard() {
     return `/property/${item._id}`;
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen">Synchronizing with Curator Hub...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFF] text-[#1F2328] flex flex-col">
+        <Navbar isAuthenticated={true} />
+        <div className="flex-1 flex items-center justify-center text-sm text-[#6D7480]">Loading dashboard...</div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-[#fafbfa] min-h-screen font-sans">
+    <div className="min-h-screen bg-[#F8FAFF] text-[#1F2328] flex flex-col">
       <Navbar isAuthenticated={true} />
-      
-      {/* Header Profile Section */}
-      <section className="bg-white border-b border-gray-100 py-16 animate-fadeIn">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center gap-8">
-            <div className="w-24 h-24 bg-green-700 text-white rounded-[32px] flex items-center justify-center text-4xl font-black shadow-2xl relative">
-              {user?.fullname[0]}
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full border-4 border-white"></div>
-            </div>
-            <div>
-              <h1 className="text-4xl font-black text-green-900 tracking-tighter uppercase">{user?.fullname}</h1>
-              <div className="flex items-center gap-4 mt-1 text-gray-400 font-bold text-xs">
-                <span>ESTABLISHED CURATOR</span>
-                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                <span className="uppercase">{user?.email}</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-4">
-             <Link to="/post-ad" className="bg-green-700 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-800 transition shadow-xl">
-               NEW LISTING +
-             </Link>
-             <button onClick={handleLogout} className="bg-gray-50 text-gray-400 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-100 transition">
-               SECURE LOGOUT
-             </button>
+
+      <section className="bg-white border-b border-[#ECEEF1]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-sm text-[#8A9099]">
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => navigate('/')} className="hover:text-[#0B1F5E] transition">Home</button>
+            <span>/</span>
+            <span className="text-[#434A54]">Dashboard</span>
           </div>
         </div>
       </section>
 
-      <main className="max-w-7xl mx-auto py-12 px-6">
-        
-        {/* Analytics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-           {[
-             { label: 'Total Asset Value', val: `$${listings.reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString()}`, color: 'text-green-700' },
-             { label: 'Active Curations', val: listings.length, color: 'text-zinc-900' },
-             // { label: 'Market Inquiries', val: '24', color: 'text-yellow-600' }
-           ].map(stat => (
-             <div key={stat.label} className="bg-white p-8 rounded-[32px] shadow-lg border border-gray-50 flex flex-col justify-center items-center text-center">
-                <div className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">{stat.label}</div>
-                <div className={`text-4xl font-black ${stat.color} tracking-tighter`}>{stat.val}</div>
-             </div>
-           ))}
+      <main className="flex-1 max-w-7xl mx-auto w-full py-8 px-4 sm:px-6">
+        <section className="mb-6 bg-[#FFFFFF] border border-[#D9DEE8] rounded-sm p-6 sm:p-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-[#111827] text-white rounded-full flex items-center justify-center text-2xl font-bold">
+                {user?.fullname?.[0] || 'U'}
+              </div>
+              <div>
+                <h1 className="text-[28px] sm:text-[34px] font-extrabold text-[#262B31]">Welcome, {user?.fullname}</h1>
+                <p className="text-[#6D7480] mt-1">Manage your listings, activity, and account overview.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Link to="/post-ad" className="h-11 px-5 bg-[#0B1F5E] text-white text-sm font-bold inline-flex items-center hover:bg-[#081742] transition">
+                Post New Ad
+              </Link>
+              <button onClick={handleLogout} className="h-11 px-5 bg-[#111827] text-white text-sm font-bold hover:bg-[#000000] transition">
+                Logout
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {[
+            {
+              label: 'Total Listing Value',
+              value: `LKR ${listings.reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString()}`,
+              tone: 'text-[#0B1F5E]'
+            },
+            {
+              label: 'Active Listings',
+              value: listings.length,
+              tone: 'text-[#2B3036]'
+            },
+            {
+              label: 'Account Email',
+              value: user?.email || '-',
+              tone: 'text-[#2B3036]'
+            }
+          ].map((stat) => (
+            <div key={stat.label} className="bg-white border border-[#E7E9ED] rounded-sm p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[#9AA1AC] font-semibold">{stat.label}</p>
+              <p className={`text-2xl font-extrabold mt-2 break-words ${stat.tone}`}>{stat.value}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex border-b border-gray-100 mb-8 gap-12">
-            {['assets', 'acquisitions', 'performance'].map(t => (
-              <button 
-                key={t}
-                onClick={() => setActiveTab(t)}
-                className={`pb-4 text-xs font-black uppercase tracking-widest transition-all relative
-                ${activeTab === t ? 'text-green-700' : 'text-gray-400 hover:text-gray-600'}`}
+        <div className="bg-white border border-[#E7E9ED] rounded-sm p-2 sm:p-3 mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <div className="flex flex-wrap gap-2">
+            {['assets', 'acquisitions', 'performance'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`h-10 px-4 text-sm font-semibold transition ${
+                  activeTab === tab
+                    ? 'bg-[#EAF0FF] text-[#0B1F5E] border border-[#CFD9F3]'
+                    : 'text-[#606773] hover:bg-[#F7F8FA] border border-transparent'
+                }`}
               >
-                {t === 'assets' ? 'MY CURATED ASSETS' : t === 'acquisitions' ? 'ACQUISITION INTERESTS' : 'MARKET PERFORMANCE'}
-                {activeTab === t && <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-700 rounded-t-full"></div>}
+                {tab === 'assets' ? 'My Listings' : tab === 'acquisitions' ? 'Inquiries' : 'Performance'}
               </button>
             ))}
+          </div>
         </div>
 
-        {/* Tab Content */}
-        {activeTab === 'assets' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {listings.map(item => (
-              <div key={item._id} className="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-50 group hover:translate-y-[-8px] transition-all duration-300">
-                <div className="relative h-48 overflow-hidden">
-                  <img src={resolveImageUrl(item.image)} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute top-4 left-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-black tracking-widest 
-                      ${item.status === 'APPROVED' ? 'bg-green-700 text-white' : 'bg-yellow-400 text-green-950'}`}>
-                      {item.status}
-                    </span>
-                  </div>
+        {activeTab === 'assets' ? (
+          <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {listings.map((item) => (
+              <div key={item._id} className="bg-white border border-[#E7E9ED] rounded-sm overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)] transition">
+                <div className="relative h-44 bg-[#EFF2F5]">
+                  <img src={resolveImageUrl(item.image)} alt={item.title} className="w-full h-full object-cover" />
+                  <span className={`absolute top-3 left-3 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${item.status === 'APPROVED' ? 'bg-[#44A046] text-white' : 'bg-[#F5B82E] text-[#3F320B]'}`}>
+                    {item.status}
+                  </span>
                 </div>
-                <div className="p-8">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="text-xs font-black text-gray-400 uppercase">{item.type}</div>
-                    <div className="text-2xl font-bold text-green-700 tracking-tight">${item.price?.toLocaleString()}</div>
+
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-[#9AA1AC] font-semibold">{item.type || 'Listing'}</p>
+                    <p className="text-[#0B1F5E] text-lg font-extrabold whitespace-nowrap">LKR {item.price?.toLocaleString()}</p>
                   </div>
-                  <h3 className="font-bold text-xl text-zinc-900 uppercase tracking-tight mb-4 truncate">{item.title}</h3>
-                  <div className="flex gap-2">
-                    <Link to={`/edit-listing/${item._id}`} className="flex-1 text-center bg-gray-50 text-sm font-bold py-3 rounded-xl hover:bg-gray-100 transition uppercase tracking-widest shadow-sm">Manage</Link>
-                    <Link to={resolveListingRoute(item)} className="flex-1 text-center bg-green-700 text-white text-sm font-bold py-3 rounded-xl hover:bg-green-800 transition uppercase tracking-widest shadow-lg">View</Link>
+                  <h3 className="font-bold text-[#2B3036] line-clamp-1">{item.title}</h3>
+
+                  <div className="flex gap-2 mt-4">
+                    <Link to={`/edit-listing/${item._id}`} className="flex-1 h-10 bg-[#F7F8FA] border border-[#E7E9ED] text-[#505863] text-sm font-semibold inline-flex items-center justify-center hover:border-[#D9DDE3] transition">
+                      Manage
+                    </Link>
+                    <Link to={resolveListingRoute(item)} className="flex-1 h-10 bg-[#111827] text-white text-sm font-semibold inline-flex items-center justify-center hover:bg-[#000000] transition">
+                      View
+                    </Link>
                   </div>
                 </div>
               </div>
             ))}
+
             {listings.length === 0 && (
-               <div className="col-span-full py-24 text-center opacity-30">
-                  <div className="text-7xl mb-6">📦</div>
-                  <h4 className="text-xl font-black text-gray-400 uppercase tracking-widest">No Active Curations</h4>
-                  <Link to="/post-ad" className="text-green-700 font-bold border-b-2 border-green-700 mt-4 inline-block italic">Begin Your First Entry →</Link>
-               </div>
+              <div className="col-span-full bg-white border border-[#E7E9ED] rounded-sm p-12 text-center text-[#8A9099]">
+                <div className="text-5xl mb-4">📦</div>
+                <h3 className="text-xl font-bold text-[#2B3036]">No listings yet</h3>
+                <p className="text-sm mt-2 mb-5">Create your first ad to see it here.</p>
+                <Link to="/post-ad" className="h-10 px-5 bg-[#0B1F5E] text-white text-sm font-bold inline-flex items-center hover:bg-[#081742] transition">
+                  Post Your First Ad
+                </Link>
+              </div>
             )}
-          </div>
+          </section>
+        ) : (
+          <section className="bg-white border border-[#E7E9ED] rounded-sm p-12 text-center text-[#8A9099] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            <div className="text-5xl mb-4">🔒</div>
+            <h3 className="text-xl font-bold text-[#2B3036]">This section is coming soon</h3>
+            <p className="text-sm mt-2">Inquiries and performance analytics are currently under maintenance.</p>
+          </section>
         )}
-
-        {activeTab !== 'assets' && (
-          <div className="py-32 text-center opacity-25">
-             <div className="text-6xl mb-6">🔒</div>
-             <h4 className="text-xl font-black text-gray-400 uppercase tracking-widest">Proprietary Data Vault</h4>
-             <p className="text-sm italic mt-2">Deep analytics and saved archives are currently under maintenance.</p>
-          </div>
-        )}
-
       </main>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
-      `}} />
-
+      <Footer />
     </div>
   );
 }

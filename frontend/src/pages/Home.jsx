@@ -9,223 +9,420 @@ import { resolveImageUrl } from '../utils/imageUrl';
 export default function Home() {
   const [categories, setCategories] = useState([]);
   const [listings, setListings] = useState([]);
-  const [featured, setFeatured] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+  const [keyword, setKeyword] = useState('');
+  const [location, setLocation] = useState('');
+  const [activeBoostedIndex, setActiveBoostedIndex] = useState(0);
 
   useEffect(() => {
-    axios.get(`${API_URL}/categories`).then(res => {
-      const allowed = ['Properties', 'Vehicles'];
-      setCategories(res.data.filter(c => allowed.includes(c.name)));
-    }).catch(console.error);
+    axios.get(`${API_URL}/categories`).then(res => setCategories(res.data)).catch(console.error);
     axios.get(`${API_URL}/listings`).then(res => setListings(res.data)).catch(console.error);
-    axios.get(`${API_URL}/listings/featured`).then(res => setFeatured(res.data)).catch(console.error);
     setIsAuthenticated(!!localStorage.getItem('token'));
   }, []);
 
-  return (
-    <div className="font-sans min-h-screen bg-[#F8F9FA] text-slate-900">
-      <Navbar isAuthenticated={isAuthenticated} />
+  const getCategoryName = (listing) => {
+    if (typeof listing?.category === 'string') return listing.category;
+    return listing?.category?.name || 'Other';
+  };
 
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-24 lg:pt-20 lg:pb-32 overflow-hidden bg-white">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="relative z-10 max-w-xl">
-            <h1 className="text-5xl lg:text-7xl font-bold text-navy leading-[1.1] mb-8">
-              Buy, sell and find <br />
-              <span className="text-navy">just about anythink.</span>
-            </h1>
-            <p className="text-lg text-slate-500 mb-10 leading-relaxed max-w-md">
-              Buy and sell everything from used cars to mobile phones and computers, or search for property, and more all over the world.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <Link to="/post-ad" className="bg-navy hover:bg-navy-light text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition shadow-xl active:scale-95 text-center">
-                Post Your Ad Now +
+  const properties = listings.filter((item) => {
+    const category = getCategoryName(item).toLowerCase();
+    const type = (item.type || '').toLowerCase();
+    return type === 'property' || category.includes('propert') || category.includes('land');
+  });
+
+  const vehicles = listings.filter((item) => {
+    const category = getCategoryName(item).toLowerCase();
+    const type = (item.type || '').toLowerCase();
+    return type === 'vehicle' || category.includes('vehicle') || category.includes('car') || category.includes('bike') || category.includes('motor');
+  });
+
+  const visibleProperties = properties.slice(0, 5);
+  const visibleVehicles = vehicles.slice(0, 5);
+  const boostedListings = listings
+    .filter((item) => item.isFeatured || (item.boostPackage && item.boostPackage !== 'Standard'))
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .slice(0, 10);
+
+  useEffect(() => {
+    if (boostedListings.length === 0) {
+      setActiveBoostedIndex(0);
+      return;
+    }
+
+    if (activeBoostedIndex >= boostedListings.length) {
+      setActiveBoostedIndex(0);
+    }
+  }, [activeBoostedIndex, boostedListings.length]);
+
+  useEffect(() => {
+    if (boostedListings.length <= 1) return;
+
+    const intervalId = setInterval(() => {
+      setActiveBoostedIndex((prev) => (prev + 1) % boostedListings.length);
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [boostedListings.length]);
+
+  const popularLocationCounts = listings.reduce((acc, item) => {
+    const key = (item.location || 'Sri Lanka').trim();
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const popularLocations = Object.entries(popularLocationCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+
+  const searchLink = `/all-ads?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`;
+
+  const cardImageFallbacks = [
+    'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1504215680853-026ed2a45def?auto=format&fit=crop&w=900&q=80'
+  ];
+
+  const locationImageFallbacks = [
+    'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1d?auto=format&fit=crop&w=900&q=80'
+  ];
+
+  const locationImageMap = {
+    colombo: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=900&q=80',
+    kandy: 'https://images.unsplash.com/photo-1509539796615-5ed58b07c3b6?auto=format&fit=crop&w=900&q=80',
+    galle: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=900&q=80',
+    negombo: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=80',
+    jaffna: 'https://images.unsplash.com/photo-1465447142348-e9952c393450?auto=format&fit=crop&w=900&q=80',
+    nuwaraeliya: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80',
+    batticaloa: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80',
+    anuradhapura: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80',
+    kurunegala: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&q=80',
+    srilanka: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=900&q=80'
+  };
+
+  const getLocationImage = (name, idx) => {
+    const normalized = String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    return locationImageMap[normalized] || locationImageFallbacks[idx % locationImageFallbacks.length];
+  };
+
+  const boostedBannerFallbacks = [
+    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80',
+    'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80',
+    'https://images.unsplash.com/photo-1549927681-0b673b8243ab?auto=format&fit=crop&w=1400&q=80',
+    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80'
+  ];
+
+  const getBoostLabel = (item) => {
+    if (item?.boostPackage === 'Elite') return 'Elite Boost';
+    if (item?.boostPackage === 'Premium') return 'Premium Boost';
+    return 'Boosted Ad';
+  };
+
+  const ListingStrip = ({ title, items, ribbonText, buttonText, bgClass, bgImage }) => (
+    <section className="mb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[24px] md:text-[27px] font-extrabold text-[#212529]">{title}</h2>
+          <Link to="/all-ads" className="text-sm font-semibold text-[#6C757D] hover:text-[#0B1F5E] transition">View All</Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {items.map((item, idx) => {
+            const categoryName = getCategoryName(item);
+            const detailsLink = (item.type === 'VEHICLE' || categoryName.toLowerCase().includes('vehicle') || categoryName.toLowerCase().includes('car'))
+              ? `/vehicle/${item._id}`
+              : `/property/${item._id}`;
+
+            return (
+              <Link
+                key={item._id || `${title}-${idx}`}
+                to={detailsLink}
+                className="bg-white border border-[#E8E8E8] rounded-[2px] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_18px_rgba(0,0,0,0.1)] transition"
+              >
+                <div className="relative h-56 bg-[#EBEEF2] overflow-hidden">
+                  <img
+                    src={resolveImageUrl(item.image) || cardImageFallbacks[idx % cardImageFallbacks.length]}
+                    alt={item.title}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      e.currentTarget.src = cardImageFallbacks[idx % cardImageFallbacks.length];
+                    }}
+                  />
+                  {idx === 0 && (
+                    <span className="absolute top-2 left-2 bg-[#0B1F5E] text-white text-[11px] uppercase font-bold px-2.5 py-1 rounded">Featured</span>
+                  )}
+                </div>
+
+                <div className="p-4">
+                  <p className="text-[13px] font-semibold text-[#6F7885] mb-1">{categoryName}</p>
+                  <h3 className="text-[16px] font-bold text-[#222] leading-6 line-clamp-2 min-h-[48px]">{item.title}</h3>
+                  <p className="text-[14px] text-[#6F7885] mt-2">{item.location || 'Sri Lanka'}</p>
+                  <p className="text-[#0B1F5E] font-extrabold text-[20px] mt-3">LKR {Number(item.price || 0).toLocaleString()}</p>
+                </div>
               </Link>
-              <Link to="/all-ads" className="bg-slate-50 text-navy px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition shadow-sm active:scale-95 text-center border border-slate-100">
-                Explore Listings
-              </Link>
-            </div>
-          </div>
-          <div className="relative flex justify-center lg:justify-end">
-            <div className="relative w-[500px] h-[500px]">
-              {/* Main Circular Image */}
-              <div className="absolute inset-0 rounded-[100px] overflow-hidden rotate-[-5deg] shadow-2xl">
-                <img
-                  src="/assets/hero-bg.png"
-                  alt="People laughing"
-                  className="w-full h-full object-cover rotate-[5deg] scale-110"
-                  onError={(e) => e.target.src = "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80"}
-                />
-              </div>
-              {/* Decorative background shape */}
-              <div className="absolute -z-10 -top-20 -right-20 w-[600px] h-[600px] bg-[#EEF2F6] rounded-full blur-3xl opacity-50"></div>
-            </div>
-          </div>
+            );
+          })}
         </div>
 
-        {/* Scroll Down Indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce cursor-pointer group z-20"
-          onClick={() => document.getElementById('recommended-ads')?.scrollIntoView({ behavior: 'smooth' })}>
-          <span className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 group-hover:text-navy transition-colors">Scroll Down</span>
-          <div className="w-6 h-10 border-2 border-slate-200 rounded-full flex justify-center p-1 group-hover:border-navy transition-colors">
-            <div className="w-1 h-2 bg-slate-300 rounded-full group-hover:bg-navy transition-colors"></div>
-          </div>
-        </div>
-      </section>
+        <div className={`${bgClass} mt-6 rounded-sm min-h-[110px] sm:min-h-[128px] relative overflow-hidden text-white`}>
+          {bgImage && (
+            <img
+              src={bgImage}
+              alt="Section background"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-black/35"></div>
 
-      {/* How it Work Section */}
-      <section className="py-24 bg-[#F8F9FA]">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-navy mb-16">How it Work</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Step 01 */}
-            <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-left relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-              <div className="absolute top-6 right-8 text-7xl font-bold text-slate-50 group-hover:text-slate-100 transition-colors">01</div>
-              <div className="w-14 h-14 rounded-xl bg-red-50 flex items-center justify-center mb-8">
-                <span className="text-3xl">👤</span>
-              </div>
-              <h3 className="text-xl font-bold text-navy mb-4">Create Account</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Donec non lorem erat. Sed vitae vene.
-              </p>
-            </div>
-
-            {/* Step 02 */}
-            <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-left relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-              <div className="absolute top-6 right-8 text-7xl font-bold text-slate-50 group-hover:text-slate-100 transition-colors">02</div>
-              <div className="w-14 h-14 rounded-xl bg-orange-50 flex items-center justify-center mb-8">
-                <span className="text-3xl">📋</span>
-              </div>
-              <h3 className="text-xl font-bold text-navy mb-4">Post a Ads</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu aliquet odio. Nulla pretium congue eros, nec rhoncus mi.
-              </p>
-            </div>
-
-            {/* Step 03 */}
-            <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-left relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-              <div className="absolute top-6 right-8 text-7xl font-bold text-slate-50 group-hover:text-slate-100 transition-colors">03</div>
-              <div className="w-14 h-14 rounded-xl bg-green-50 flex items-center justify-center mb-8">
-                <span className="text-3xl">📦</span>
-              </div>
-              <h3 className="text-xl font-bold text-navy mb-4">Start Earning</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Vestibulum quis consectetur est. Fusce hendrerit neque at facilisis facilisis. Praesent a pretium elit. Nulla aliquam puru.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Fresh recommended ads */}
-      <section id="recommended-ads" className="py-24 bg-white scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-navy mb-4">Featured ads</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {listings.slice(0, 12).map((item, idx) => {
-              const detailsLink = item.category?.name === 'Vehicles' ? `/vehicle/${item._id}` : `/property/${item._id}`;
-              return (
-                <Link
-                  key={item._id || idx}
-                  to={detailsLink}
-                  className="bg-white rounded-xl overflow-hidden shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-300 group border border-slate-100 flex flex-col hover:-translate-y-1"
-                >
-                  <div className="relative h-56 overflow-hidden">
-                    <img src={resolveImageUrl(item.image)} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    {idx === 0 && (
-                      <div className="absolute top-4 left-0">
-                        <div className="bg-[#FF4D4D] text-white text-xs font-bold px-3 py-1 uppercase tracking-wider -rotate-45 -translate-x-1/4">New</div>
-                      </div>
-                    )}
-                    {idx === 2 || idx === 6 ? (
-                      <div className="absolute top-4 left-0">
-                        <div className="bg-[#FF4D4D] text-white text-xs font-bold px-3 py-1 uppercase tracking-wider -rotate-45 -translate-x-1/4">Urgent</div>
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex items-center gap-1.5 text-slate-500 text-sm mb-3 font-semibold">
-                      <span className="text-xs">📍</span> {item.location || 'All over'}
-                    </div>
-                    <h3 className="font-bold text-slate-900 text-lg mb-4 line-clamp-2 leading-snug group-hover:text-blue-600 transition truncate uppercase tracking-tight">
-                      {item.title}
-                    </h3>
-                    <div className="mt-auto pt-4 border-t border-slate-50 flex justify-between items-center">
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-2 font-bold uppercase tracking-widest">
-                          <span>🛠️</span> {item.category?.name || 'Category'}
-                        </div>
-                        <div className="text-red-600 font-bold text-xl flex items-center tracking-tight">
-                          <span className="text-sm mr-1">$</span>{item.price?.toLocaleString()}
-                        </div>
-                      </div>
-                      <div className="w-8 h-8 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-all">
-                        ➜
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-
-          <div className="mt-16 text-center">
-            <Link to="/all-ads" className="inline-flex items-center gap-2 bg-navy hover:bg-navy-light text-white px-8 py-3.5 rounded-lg font-semibold transition shadow-lg shadow-navy/20 active:scale-95">
-              View Ads <span className="text-lg">→</span>
+          <div className="relative z-10 h-full min-h-[110px] sm:min-h-[128px] flex items-center justify-between px-6 gap-4">
+            <p className="text-xl md:text-2xl font-extrabold tracking-wide">{ribbonText}</p>
+            <Link to="/all-ads" className="bg-white text-[#1A2A3A] text-sm font-bold px-5 py-2.5 rounded-sm hover:bg-[#F4F5F7] transition whitespace-nowrap">
+              {buttonText}
             </Link>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
 
-      {/* Top Category Section */}
-      <section className="py-24 bg-[#F5F7FA]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl font-bold text-navy">Top Category</h2>
-          </div>
+  return (
+    <div className="min-h-screen bg-[#F8FAFF] text-[#1D1D1D]">
+      <Navbar isAuthenticated={isAuthenticated} />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {categories.map((cat, idx) => {
-              const count = listings.filter(l => (l.category?.name || l.category) === cat.name).length;
-              const subLinks = cat.name === 'Vehicles'
-                ? ['Luxury Cars', 'Vintage Collections', 'Daily Drivers', 'Motorcycles']
-                : ['Villas & Estates', 'Luxury Penthouses', 'Modern Lofts', 'Nordic Cabins'];
+      <section className="bg-[#EEE9DF] pb-14 relative overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(0,0,0,0.03) 25%, rgba(0,0,0,0.03) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.03) 75%, rgba(0,0,0,0.03) 76%, transparent 77%), linear-gradient(90deg, transparent 24%, rgba(0,0,0,0.03) 25%, rgba(0,0,0,0.03) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.03) 75%, rgba(0,0,0,0.03) 76%, transparent 77%), url("https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=1600&q=80")',
+            backgroundSize: '56px 56px, 56px 56px, cover',
+            backgroundPosition: '0 0, 0 0, center',
+            backgroundRepeat: 'repeat, repeat, no-repeat'
+          }}
+        ></div>
 
-              return (
-                <div key={cat._id || idx} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100/50 hover:shadow-xl transition-all duration-300">
-                  <div className="flex justify-between items-start mb-8">
-                    <div>
-                      <h3 className="text-2xl font-black text-navy mb-1 uppercase tracking-tight">{cat.name}</h3>
-                      <p className="text-sm text-slate-400 font-bold">({count?.toLocaleString()})</p>
-                    </div>
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${idx === 1 ? 'bg-navy text-white shadow-lg shadow-navy/30' : 'bg-slate-50 text-navy'}`}>
-                      {cat.name === 'Properties' ? <span className="text-2xl">🏘️</span> : cat.name === 'Vehicles' ? <span className="text-2xl">🏎️</span> : '📦'}
-                    </div>
-                  </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-20 text-center relative z-10">
+          <p className="text-[#0B1F5E] font-semibold text-lg">Over {listings.length.toLocaleString()} active ads</p>
+          <h1 className="text-[#24282D] font-extrabold text-4xl md:text-5xl leading-tight mt-3">
+            Sri Lanka&apos;s Largest Classified Marketplace
+          </h1>
 
-                  <ul className="space-y-4 mb-10">
-                    {subLinks.map((sub, sIdx) => (
-                      <li key={sIdx} className="group">
-                        <Link to={`/all-ads?category=${cat.name}&sub=${sub}`} className="flex items-center gap-4 text-slate-600 text-base hover:text-navy transition font-semibold">
-                          <span className="text-sm text-slate-300 group-hover:text-navy group-hover:translate-x-1 transition-transform">➜</span> {sub}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link to={`/all-ads?category=${cat.name}`} className="text-lg font-black text-navy hover:text-navy-light transition flex items-center gap-2 group underline decoration-navy/20 underline-offset-8">
-                    View All <span className="group-hover:translate-x-1 transition-transform">→</span>
-                  </Link>
-                </div>
-              );
-            })}
+          <div className="bg-white border border-[#E4E5E7] shadow-[0_14px_35px_rgba(0,0,0,0.12)] mt-10 p-5 rounded-sm text-left">
+            <h2 className="text-lg font-bold text-[#333] mb-4">Classified Search</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="Enter keywords"
+                className="bg-[#F8F8F8] border border-[#E2E3E5] h-11 px-3 text-sm focus:outline-none focus:border-[#0B1F5E]"
+              />
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Enter location"
+                className="bg-[#F8F8F8] border border-[#E2E3E5] h-11 px-3 text-sm focus:outline-none focus:border-[#0B1F5E]"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setKeyword('');
+                  setLocation('');
+                }}
+                className="text-sm text-[#44A046] font-semibold hover:underline w-fit"
+              >
+                Reset Search
+              </button>
+              <div className="flex items-center gap-3">
+                <Link to="/all-ads" className="text-sm text-[#0B1F5E] font-semibold hover:underline">Advanced Search</Link>
+                <Link to={searchLink} className="bg-[#0B1F5E] text-white h-11 px-6 inline-flex items-center justify-center text-sm font-bold hover:bg-[#081742] transition">
+                  Search Now
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
+      <main className="py-10">
+        {boostedListings.length > 0 && (
+          <section className="mb-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[24px] md:text-[27px] font-extrabold text-[#212529]">Boosted Spotlight</h2>
+                <Link to="/all-ads?boosted=true" className="text-sm font-semibold text-[#6C757D] hover:text-[#0B1F5E] transition">Show More</Link>
+              </div>
+
+              <div className="relative">
+                {(() => {
+                  const item = boostedListings[activeBoostedIndex];
+                  const categoryName = getCategoryName(item);
+                  const detailsLink = (item.type === 'VEHICLE' || categoryName.toLowerCase().includes('vehicle') || categoryName.toLowerCase().includes('car'))
+                    ? `/vehicle/${item._id}`
+                    : `/property/${item._id}`;
+
+                  return (
+                    <Link
+                      key={item._id || `boosted-${activeBoostedIndex}`}
+                      to={detailsLink}
+                      className="relative h-64 sm:h-72 rounded-sm overflow-hidden group block"
+                    >
+                      <img
+                        src={resolveImageUrl(item.image) || boostedBannerFallbacks[activeBoostedIndex % boostedBannerFallbacks.length]}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        onError={(e) => {
+                          e.currentTarget.src = boostedBannerFallbacks[activeBoostedIndex % boostedBannerFallbacks.length];
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-transparent"></div>
+                      <div className="absolute inset-0 p-5 sm:p-6 flex flex-col justify-between text-white">
+                        <div className="flex items-start justify-between gap-4">
+                          <span className="bg-[#0B1F5E] text-white text-[11px] uppercase font-bold px-2.5 py-1 rounded tracking-wide">{getBoostLabel(item)}</span>
+                          <span className="bg-white/20 text-white text-[11px] uppercase font-semibold px-2.5 py-1 rounded tracking-wide">{categoryName}</span>
+                        </div>
+
+                        <div>
+                          <h3 className="text-2xl sm:text-[30px] font-extrabold text-white line-clamp-2 max-w-2xl">{item.title}</h3>
+                          <p className="text-sm sm:text-base text-white mt-1">{item.location || 'Sri Lanka'}</p>
+                          <p className="text-lg sm:text-xl font-extrabold text-white mt-2">LKR {Number(item.price || 0).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })()}
+
+                {boostedListings.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setActiveBoostedIndex((prev) => (prev - 1 + boostedListings.length) % boostedListings.length)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/45 text-white hover:bg-black/60 transition"
+                      aria-label="Previous boosted ad"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveBoostedIndex((prev) => (prev + 1) % boostedListings.length)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/45 text-white hover:bg-black/60 transition"
+                      aria-label="Next boosted ad"
+                    >
+                      ›
+                    </button>
+
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                      {boostedListings.map((_, idx) => (
+                        <button
+                          key={`boost-dot-${idx}`}
+                          type="button"
+                          onClick={() => setActiveBoostedIndex(idx)}
+                          className={`w-2.5 h-2.5 rounded-full transition ${idx === activeBoostedIndex ? 'bg-white' : 'bg-white/45 hover:bg-white/75'}`}
+                          aria-label={`Go to boosted slide ${idx + 1}`}
+                        ></button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <ListingStrip
+          title="Real Estate Ads"
+          items={visibleProperties}
+          ribbonText="LOOKING FOR YOUR DREAM HOUSE?"
+          buttonText="Purchase Now"
+          bgClass="bg-gradient-to-r from-[#1C2D3A] via-[#243D4A] to-[#1C2D3A]"
+          bgImage="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1600&q=80"
+        />
+
+        <ListingStrip
+          title="Vehicle Ads"
+          items={visibleVehicles}
+          ribbonText="BEST CARS FOR SALE TODAY"
+          buttonText="Purchase Now"
+          bgClass="bg-gradient-to-r from-[#212226] via-[#3D3F48] to-[#212226]"
+          bgImage="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80"
+        />
+
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-8">
+          <div className="bg-[#FFFFFF] p-6 sm:p-8 rounded-sm border border-[#D9DEE8]">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-[24px] font-extrabold text-[#2A2F34]">Popular Locations</h2>
+              <Link to="/all-ads" className="text-sm text-[#6C757D] font-semibold hover:text-[#0B1F5E] transition">View All Locations</Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {popularLocations.map(([name, count], idx) => (
+                <Link
+                  key={name}
+                  to={`/all-ads?location=${encodeURIComponent(name)}`}
+                  className="group bg-white border border-[#E2E4E8] rounded-sm overflow-hidden block hover:border-[#0B1F5E] hover:shadow-[0_6px_18px_rgba(11,31,94,0.15)] transition"
+                >
+                  <div className="h-28 bg-[#CFD7DF]">
+                    <img
+                      src={getLocationImage(name, idx)}
+                      alt={name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src = locationImageFallbacks[idx % locationImageFallbacks.length];
+                      }}
+                    />
+                  </div>
+                  <div className="p-3 flex items-center justify-between">
+                    <p className="font-bold text-[14px] text-[#2B3138] group-hover:text-[#0B1F5E]">{name}</p>
+                    <span className="text-xs text-[#858D98]">{count} ads</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-8">
+          <div className="bg-white border border-[#D9DEE8] p-6 sm:p-8 rounded-sm">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-[24px] font-extrabold text-[#2A2F34]">Browse by Category</h3>
+                <p className="text-sm text-[#6C757D] mt-1">Choose a category to discover the latest listings quickly.</p>
+              </div>
+              <Link to="/all-ads" className="text-sm text-[#6C757D] font-semibold hover:text-[#0B1F5E] transition">View All Ads</Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {categories
+                .filter((cat) => ['properties', 'vehicles'].includes((cat.name || '').toLowerCase()))
+                .map((cat) => (
+                <Link
+                  key={cat._id || cat.name}
+                  to={`/all-ads?category=${encodeURIComponent(cat.name)}`}
+                  className="group bg-[#F8FAFF] border border-[#E2E6EF] rounded-sm p-5 hover:border-[#0B1F5E] hover:shadow-[0_8px_20px_rgba(11,31,94,0.15)] transition"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="w-10 h-10 bg-white border border-[#D9DEE8] text-[#0B1F5E] rounded-sm flex items-center justify-center text-lg font-bold">
+                        {cat.name.toLowerCase().includes('propert') ? '🏠' : '🚗'}
+                      </div>
+                      <h4 className="text-[18px] font-extrabold text-[#2B3138] mt-3 group-hover:text-[#0B1F5E] transition">{cat.name}</h4>
+                      <p className="text-sm text-[#6D7480] mt-1">{cat.name.toLowerCase().includes('propert') ? 'Houses, lands, and rental properties' : 'Cars, bikes, and other vehicles'}</p>
+                    </div>
+                    <span className="text-[#9AA1AC] group-hover:text-[#0B1F5E] transition text-lg">→</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
 
       <Footer />
     </div>

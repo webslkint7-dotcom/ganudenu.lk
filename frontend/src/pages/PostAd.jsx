@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -296,6 +297,8 @@ export default function PostAd() {
         image: optimizedImages[0] || '',
         price: Number(formData.price),
         isFeatured: selectedBoost !== 'Standard', // Paid boosts mark as featured immediately
+        boostPackage: selectedBoost,
+        boostAddons: addons,
         propertyDetails: formData.type === 'PROPERTY' ? {
           ...formData.propertyDetails,
           beds: Number(formData.propertyDetails.beds),
@@ -327,32 +330,42 @@ export default function PostAd() {
       {[1, 2, 3, 4].map((s) => (
         <React.Fragment key={s}>
           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm transition-all shadow-md
-            ${step >= s ? 'bg-slate-900 text-white' : 'bg-white text-slate-300 border border-slate-200'}`}>
+            ${step >= s ? 'bg-[#0B1F5E] text-white' : 'bg-white text-slate-300 border border-slate-200'}`}>
             {s}
           </div>
-          {s < 4 && <div className={`h-1 w-12 rounded-full ${step > s ? 'bg-slate-900' : 'bg-slate-100'}`}></div>}
+          {s < 4 && <div className={`h-1 w-12 rounded-full ${step > s ? 'bg-[#0B1F5E]' : 'bg-slate-100'}`}></div>}
         </React.Fragment>
       ))}
     </div>
   );
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen font-sans pb-20">
+    <div className="bg-[#F8FAFF] min-h-screen font-sans pb-20 text-[#1F2328]">
       <Navbar isAuthenticated={true} />
-      
-      <main className="max-w-6xl mx-auto py-12 px-6">
-        <div className="text-center mb-12">
-           <h1 className="text-4xl lg:text-7xl font-black text-slate-900 uppercase tracking-tighter">Submit Your Ad</h1>
-           <p className="text-slate-500 font-medium mt-2 capitalize">{formData.category.toLowerCase()} listing flow with premium promotion packages.</p>
+
+      <section className="bg-white border-b border-[#ECEEF1]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-sm text-[#8A9099]">
+          <div className="flex items-center gap-2">
+            <Link to="/" className="hover:text-[#0B1F5E] transition">Home</Link>
+            <span>/</span>
+            <span className="text-[#434A54]">Post Ad</span>
+          </div>
         </div>
+      </section>
+      
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
+        <section className="mb-6 bg-[#FFFFFF] border border-[#D9DEE8] rounded-sm p-6 sm:p-8 text-center">
+          <h1 className="text-[30px] sm:text-[38px] font-extrabold text-[#262B31]">Submit Your Ad</h1>
+          <p className="text-[#6D7480] mt-2 capitalize">{formData.category.toLowerCase()} listing flow with premium promotion packages.</p>
+        </section>
 
         <StepIndicator />
 
         {paymentProcessing ? (
-           <div className="max-w-xl mx-auto bg-white rounded-[3rem] p-16 text-center shadow-2xl border border-slate-50 animate-in fade-in zoom-in-95 duration-700">
+           <div className="max-w-xl mx-auto bg-white rounded-sm p-16 text-center shadow-2xl border border-[#E7E9ED] animate-in fade-in zoom-in-95 duration-700">
              <div className="relative w-24 h-24 mx-auto mb-8">
                <div className="absolute inset-0 border-8 border-slate-100 rounded-full"></div>
-               <div className="absolute inset-0 border-8 border-blue-700 rounded-full border-t-transparent animate-spin"></div>
+               <div className="absolute inset-0 border-8 border-[#0B1F5E] rounded-full border-t-transparent animate-spin"></div>
                <div className="absolute inset-0 flex items-center justify-center text-3xl">🛡️</div>
              </div>
              <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-4">Verifying Transaction</h2>
@@ -364,13 +377,13 @@ export default function PostAd() {
             {/* STEP 1: Category & Identification */}
             {step === 1 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-100 space-y-10">
+                <div className="bg-white rounded-sm p-8 sm:p-10 shadow-sm border border-[#E7E9ED] space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                      <section className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
                         <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-4">1. Principal Category</label>
                         <div className="flex gap-3">
                            {categories.map(cat => (
-                              <button key={cat} onClick={() => { handleInputChange('category', cat); handleInputChange('type', cat === 'Properties' ? 'PROPERTY' : 'VEHICLE'); handleInputChange('propertyType', cat === 'Properties' ? 'House' : 'Car'); }} className={`flex-1 px-8 py-5 rounded-2xl text-xs font-black uppercase tracking-widest border-2 transition-all ${formData.category === cat ? 'bg-blue-700 text-white border-blue-700 shadow-xl scale-105' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'}`}>{cat}</button>
+                            <button key={cat} onClick={() => { handleInputChange('category', cat); handleInputChange('type', cat === 'Properties' ? 'PROPERTY' : 'VEHICLE'); handleInputChange('propertyType', cat === 'Properties' ? 'House' : 'Car'); }} className={`flex-1 px-8 py-5 rounded-xl text-xs font-black uppercase tracking-widest border-2 transition-all ${formData.category === cat ? 'bg-[#0B1F5E] text-white border-[#0B1F5E] shadow-xl scale-105' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'}`}>{cat}</button>
                            ))}
                         </div>
                      </section>
@@ -400,7 +413,7 @@ export default function PostAd() {
                           <select 
                             value={formData.location} 
                             onChange={(e) => handleInputChange('location', e.target.value)} 
-                            className="w-full bg-white border-2 border-slate-300 rounded-xl px-4 py-4 font-black text-xs outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-500/5 appearance-none cursor-pointer"
+                            className="w-full bg-white border-2 border-slate-300 rounded-xl px-4 py-4 font-black text-xs outline-none focus:border-[#0B1F5E] focus:ring-4 focus:ring-[#0B1F5E]/10 appearance-none cursor-pointer"
                           >
                             <option value="">Select District</option>
                             {SRI_LANKA_DISTRICTS.map(district => (
@@ -408,7 +421,7 @@ export default function PostAd() {
                             ))}
                           </select>
                         </div>
-                        <input value={formData.street} onChange={(e) => handleInputChange('street', e.target.value)} className="w-full bg-white border-2 border-slate-300 rounded-xl px-4 py-4 font-black text-xs outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-500/5" placeholder="Street / Town" />
+                        <input value={formData.street} onChange={(e) => handleInputChange('street', e.target.value)} className="w-full bg-white border-2 border-slate-300 rounded-xl px-4 py-4 font-black text-xs outline-none focus:border-[#0B1F5E] focus:ring-4 focus:ring-[#0B1F5E]/10" placeholder="Street / Town" />
                       </div>
                      </section>
                   </div>
@@ -436,7 +449,7 @@ export default function PostAd() {
             {/* STEP 2: Details & Content */}
             {step === 2 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
-                <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-100 space-y-10">
+                <div className="bg-white rounded-sm p-8 sm:p-10 shadow-sm border border-[#E7E9ED] space-y-10">
                    {formData.type === 'PROPERTY' ? (
                      <div className="space-y-10">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -491,7 +504,7 @@ export default function PostAd() {
                 </div>
 
                 {/* Pricing & Rent Section */}
-                <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-100 space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="bg-white rounded-sm p-8 sm:p-10 shadow-sm border border-[#E7E9ED] space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
                   <h3 className="text-xl font-black text-slate-900 uppercase">Pricing Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <div className="space-y-4">
@@ -499,8 +512,8 @@ export default function PostAd() {
                         {formData.offerType === 'Rent' ? 'Rent Amount' : 'Sale Price'} *
                       </label>
                       <div className="relative">
-                        <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-blue-700 text-xs">LKR</span>
-                        <input type="number" placeholder="Enter Amount" value={formData.price} onChange={(e) => handleInputChange('price', e.target.value)} className="w-full bg-white border-2 border-slate-300 rounded-xl pl-14 pr-4 py-4 font-black text-slate-900 focus:border-blue-700 outline-none transition-all shadow-sm" />
+                        <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-[#0B1F5E] text-xs">LKR</span>
+                        <input type="number" placeholder="Enter Amount" value={formData.price} onChange={(e) => handleInputChange('price', e.target.value)} className="w-full bg-white border-2 border-slate-300 rounded-xl pl-14 pr-4 py-4 font-black text-slate-900 focus:border-[#0B1F5E] outline-none transition-all shadow-sm" />
                       </div>
                     </div>
 
@@ -528,8 +541,8 @@ export default function PostAd() {
 
                 <div className="bg-white rounded-[2rem] p-10 shadow-sm border border-slate-100 space-y-6">
                    <h3 className="text-xl font-black text-slate-900 uppercase">Ad Content</h3>
-                   <input value={formData.title} onChange={(e) => handleInputChange('title', e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 font-black outline-none focus:border-blue-700" placeholder="Headline" />
-                   <textarea value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} rows={5} className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-4 font-medium outline-none focus:border-blue-700 resize-none" placeholder="Description..." />
+                   <input value={formData.title} onChange={(e) => handleInputChange('title', e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 font-black outline-none focus:border-[#0B1F5E]" placeholder="Headline" />
+                   <textarea value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} rows={5} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 font-medium outline-none focus:border-[#0B1F5E] resize-none" placeholder="Description..." />
                 </div>
 
                  <div className="flex flex-col gap-4 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
@@ -545,7 +558,7 @@ export default function PostAd() {
             {/* STEP 3: Media & Documents */}
             {step === 3 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
-                <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-100 space-y-10">
+                <div className="bg-white rounded-sm p-8 sm:p-10 shadow-sm border border-[#E7E9ED] space-y-10">
                   <h3 className="text-xl font-black text-slate-900 uppercase">Gallery & Documentation</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                      {formData.images.map((img, idx) => (
@@ -584,15 +597,15 @@ export default function PostAd() {
                     <div 
                       key={pkg.id} 
                       onClick={() => setSelectedBoost(pkg.id)}
-                      className={`relative bg-white rounded-[2.5rem] p-10 border-4 transition-all duration-500 cursor-pointer flex flex-col group
-                      ${selectedBoost === pkg.id ? 'border-blue-700 shadow-2xl scale-[1.03] z-10' : 'border-slate-50 hover:border-slate-200 shadow-sm opacity-80 hover:opacity-100'}`}
+                      className={`relative bg-white rounded-sm p-10 border-2 transition-all duration-500 cursor-pointer flex flex-col group
+                      ${selectedBoost === pkg.id ? 'border-[#0B1F5E] shadow-2xl scale-[1.03] z-10' : 'border-slate-100 hover:border-slate-200 shadow-sm opacity-80 hover:opacity-100'}`}
                     >
                       <div className="flex justify-between items-start mb-8">
-                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-sm ${selectedBoost === pkg.id ? 'bg-blue-50' : 'bg-slate-50'}`}>
+                        <div className={`w-16 h-16 rounded-xl flex items-center justify-center text-3xl shadow-sm ${selectedBoost === pkg.id ? 'bg-[#EAF0FF]' : 'bg-slate-50'}`}>
                           {pkg.icon}
                         </div>
                         {pkg.id === 'Elite' && (
-                          <span className="bg-blue-600 text-white text-[8px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full shadow-lg">Popular</span>
+                          <span className="bg-[#0B1F5E] text-white text-[8px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full shadow-lg">Popular</span>
                         )}
                       </div>
 
@@ -605,19 +618,19 @@ export default function PostAd() {
                       <div className="flex-1 space-y-4 mb-10">
                         {pkg.features.map(f => (
                           <div key={f} className="flex items-center gap-3">
-                            <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${selectedBoost === pkg.id ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-400'}`}>✓</span>
+                            <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${selectedBoost === pkg.id ? 'bg-[#0B1F5E] text-white' : 'bg-slate-100 text-slate-400'}`}>✓</span>
                             <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{f}</span>
                           </div>
                         ))}
                       </div>
 
                       <div className={`w-full py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all text-center
-                        ${selectedBoost === pkg.id ? 'bg-blue-100 text-blue-700' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                        ${selectedBoost === pkg.id ? 'bg-[#EAF0FF] text-[#0B1F5E]' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
                         {selectedBoost === pkg.id ? 'Selected' : 'Select Plan'}
                       </div>
 
                       {selectedBoost === pkg.id && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-700 text-white text-[8px] font-black whitespace-nowrap px-6 py-2 rounded-full uppercase tracking-[0.3em] shadow-xl">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0B1F5E] text-white text-[8px] font-black whitespace-nowrap px-6 py-2 rounded-full uppercase tracking-[0.3em] shadow-xl">
                           Active Choice
                         </div>
                       )}
@@ -626,7 +639,7 @@ export default function PostAd() {
                 </div>
 
                 {/* Final Checkout Bar */}
-                <div className="bg-white rounded-[3rem] p-10 shadow-2xl border-2 border-slate-100 mt-20 flex flex-col lg:flex-row items-center justify-between gap-12 group">
+                <div className="bg-white rounded-sm p-10 shadow-2xl border-2 border-[#E7E9ED] mt-20 flex flex-col lg:flex-row items-center justify-between gap-12 group">
                   <div className="space-y-6 flex-1">
                     <div className="flex items-center gap-3">
                        <span className="w-2 h-2 rounded-full bg-blue-700"></span>

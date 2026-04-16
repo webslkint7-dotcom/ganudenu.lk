@@ -13,6 +13,8 @@ const listingSchema = new mongoose.Schema({
   badges: [{ type: String }],
   features: [{ type: String }],
   isFeatured: { type: Boolean, default: false },
+  boostPackage: { type: String, enum: ['Standard', 'Premium', 'Elite'], default: 'Standard' },
+  boostAddons: [{ type: String }],
   status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
   offerType: { type: String, enum: ['Sale', 'Rent', 'Wanted', 'Other'], default: 'Sale' },
   rentPeriod: { type: String, enum: ['Monthly', 'Weekly', 'Daily', 'Yearly'], default: 'Monthly' },

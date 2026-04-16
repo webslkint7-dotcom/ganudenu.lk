@@ -29,7 +29,7 @@ router.get('/', auth, async (req, res) => {
     })
     .populate('sender', 'fullname email')
     .populate('receiver', 'fullname email')
-    .populate('listing', 'title price')
+    .populate('listing', 'title price image images category type')
     .sort('-createdAt');
     
     res.json(messages);
@@ -49,6 +49,7 @@ router.get('/thread/:userId', auth, async (req, res) => {
     })
     .populate('sender', 'fullname')
     .populate('receiver', 'fullname')
+    .populate('listing', 'title price image images category type')
     .sort('createdAt');
     
     res.json(messages);

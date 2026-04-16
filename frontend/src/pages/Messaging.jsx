@@ -1,9 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import API from '../api';
+import { resolveImageUrl } from '../utils/imageUrl';
+
+const getListingImage = (listing) => {
+  if (!listing) return '';
+  return listing.image || listing.images?.[0] || '';
+};
+
+const getListingPath = (listing) => {
+  if (!listing) return '';
+  return `/${listing.type === 'VEHICLE' ? 'vehicle' : 'property'}/${listing._id}`;
+};
 
 export default function Messaging() {
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [activeUser, setActiveUser] = useState(null);
   const [activeListing, setActiveListing] = useState(null);
@@ -14,11 +27,17 @@ export default function Messaging() {
   const scrollRef = useRef();
 
   useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      navigate('/login');
+      return;
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     let isMounted = true;
     let intervalId;
     
     const fetchInitial = async () => {
-      const token = localStorage.getItem('token');
       try {
         const userRes = await API.get('/auth/me');
         if (!isMounted) return;
@@ -34,11 +53,18 @@ export default function Messaging() {
             convRes.data.forEach(m => {
               const otherUser = m.sender._id === userRes.data._id ? m.receiver : m.sender;
               if (!seen.has(otherUser._id)) {
+                const unreadCount = convRes.data.filter((message) => {
+                  const senderId = typeof message.sender === 'object' ? message.sender?._id : message.sender;
+                  const receiverId = typeof message.receiver === 'object' ? message.receiver?._id : message.receiver;
+                  return senderId === otherUser._id && receiverId === userRes.data._id && !message.isRead;
+                }).length;
+
                 grouped.push({
                   otherUser,
                   lastMessage: m.content,
                   createdAt: m.createdAt,
-                  listing: m.listing
+                  listing: m.listing,
+                  unreadCount
                 });
                 seen.add(otherUser._id);
               }
@@ -55,6 +81,9 @@ export default function Messaging() {
         }
       } catch (err) {
         console.error(err);
+        if (isMounted) {
+          navigate('/login');
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -69,7 +98,6 @@ export default function Messaging() {
 
   useEffect(() => {
     if (activeUser) {
-      const token = localStorage.getItem('token');
       const fetchThread = () => {
         API.get(`/messages/thread/${activeUser._id}`).then(res => {
           setMessages(prev => prev.length === res.data.length ? prev : res.data);
@@ -77,6 +105,7 @@ export default function Messaging() {
       };
       
       fetchThread();
+      API.put(`/messages/read/${activeUser._id}`).catch(console.error);
       const intervalId = setInterval(fetchThread, 3000);
       return () => clearInterval(intervalId);
     }
@@ -86,11 +115,41 @@ export default function Messaging() {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const unreadTotal = conversations.reduce((total, conv) => total + (conv.unreadCount || 0), 0);
+
+  const renderListingPreview = (listing, compact = false) => {
+    if (!listing) return null;
+
+    return (
+      <Link
+        to={getListingPath(listing)}
+        className={`group flex items-center gap-2 bg-[#F7F8FA] border border-[#E7E9ED] hover:border-[#0B1F5E] transition ${compact ? 'px-2 py-1' : 'p-3'}`}
+      >
+        <div className={`${compact ? 'w-8 h-8' : 'w-14 h-14'} rounded-sm overflow-hidden bg-white shrink-0 border border-[#E7E9ED]`}>
+          <img
+            src={resolveImageUrl(getListingImage(listing))}
+            alt={listing.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="min-w-0 flex-1 text-left">
+          <div className={`${compact ? 'text-[10px]' : 'text-sm'} font-bold text-[#2B3036] truncate group-hover:text-[#0B1F5E] transition`}>
+            {listing.title}
+          </div>
+          <div className={`${compact ? 'text-[10px]' : 'text-xs'} text-[#6D7480]`}>Tap to open ad</div>
+          <div className={`${compact ? 'text-[10px]' : 'text-xs'} font-bold text-[#0B1F5E] mt-0.5`}>
+            LKR {listing.price?.toLocaleString()}
+          </div>
+        </div>
+        <span className="text-[#9AA1AC] group-hover:text-[#0B1F5E] transition text-lg shrink-0">→</span>
+      </Link>
+    );
+  };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
     
-    const token = localStorage.getItem('token');
     try {
       const res = await API.post('/messages', {
         receiver: activeUser._id,
@@ -104,23 +163,56 @@ export default function Messaging() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen">Connecting Secure Message Hub...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFF] text-[#1F2328] flex flex-col">
+        <Navbar isAuthenticated={!!currentUser} />
+        <div className="flex-1 flex items-center justify-center text-sm text-[#6D7480]">Loading messages...</div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-[#fafbfa] h-screen flex flex-col font-sans overflow-hidden">
-      <Navbar isAuthenticated={true} />
-      
-      <main className="flex-1 max-w-7xl mx-auto w-full flex gap-1 py-8 px-6 overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFF] text-[#1F2328] flex flex-col">
+      <Navbar isAuthenticated={!!currentUser} />
+
+      <section className="bg-white border-b border-[#ECEEF1]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-sm text-[#8A9099]">
+          <div className="flex items-center gap-2">
+            <Link to="/" className="hover:text-[#0B1F5E] transition">Home</Link>
+            <span>/</span>
+            <span className="text-[#434A54]">Messaging</span>
+          </div>
+        </div>
+      </section>
+
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
+        <section className="mb-6 bg-[#FFFFFF] border border-[#D9DEE8] rounded-sm p-6 sm:p-8">
+          <h1 className="text-[30px] sm:text-[38px] font-extrabold text-[#262B31]">Messaging Center</h1>
+          <p className="text-[#6D7480] mt-2 max-w-3xl leading-7">
+            Manage conversations with buyers and sellers in one place. Select a chat and send your message.
+          </p>
+        </section>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)] gap-6 min-h-[70vh]">
         
         {/* Conversations Sidebar */}
-        <div className="w-80 bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden border border-gray-100">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-xl font-black text-navy uppercase tracking-tighter">Secure Inbox</h2>
-            <div className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest">VERIFIED CHANNELS ONLY</div>
+        <aside className="bg-white rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] h-[70vh] flex flex-col overflow-hidden border border-[#E7E9ED]">
+          <div className="p-5 border-b border-[#EEF0F3]">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-[20px] font-extrabold text-[#2B3036]">Inbox</h2>
+              {unreadTotal > 0 && (
+                <span className="min-w-6 h-6 px-2 rounded-full bg-[#0B1F5E] text-white text-[11px] font-bold inline-flex items-center justify-center">
+                  {unreadTotal > 99 ? '99+' : unreadTotal}
+                </span>
+              )}
+            </div>
+            <div className="text-[12px] text-[#8A9099] mt-1">Recent conversations</div>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             {conversations.length === 0 ? (
-              <div className="p-12 text-center text-gray-400 italic text-sm">No active trade communications.</div>
+              <div className="p-8 text-center text-[#8A9099] text-sm">No active conversations yet.</div>
             ) : (
               conversations.map(conv => (
                 <div 
@@ -129,22 +221,39 @@ export default function Messaging() {
                     setActiveUser(conv.otherUser);
                     setActiveListing(conv.listing);
                   }}
-                  className={`p-6 border-b border-gray-50 cursor-pointer transition-all hover:bg-gray-50 
-                  ${activeUser?._id === conv.otherUser._id ? 'bg-slate-50 border-l-4 border-l-navy shadow-inner' : ''}`}
+                  className={`p-4 border-b border-[#EEF0F3] cursor-pointer transition hover:bg-[#F9FAFB]
+                  ${activeUser?._id === conv.otherUser._id ? 'bg-[#EAF0FF] border-l-4 border-l-[#0B1F5E]' : ''}`}
                 >
                   <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-xl font-black shadow-sm">
-                      {conv.otherUser.fullname[0]}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1 text-xs">
-                        <span className="font-black text-navy truncate uppercase tracking-tight">{conv.otherUser.fullname}</span>
-                        <span className="text-gray-400">{new Date(conv.createdAt).toLocaleDateString()}</span>
+                    {conv.listing ? (
+                      <div className="w-11 h-11 rounded-sm overflow-hidden bg-[#F0F2F5] border border-[#E7E9ED] shrink-0">
+                        <img
+                          src={resolveImageUrl(getListingImage(conv.listing))}
+                          alt={conv.listing.title}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <div className="text-xs text-gray-500 truncate whitespace-nowrap overflow-hidden">{conv.lastMessage}</div>
+                    ) : (
+                      <div className="w-11 h-11 bg-[#F0F2F5] rounded-full flex items-center justify-center text-base font-bold text-[#2B3036]">
+                        {conv.otherUser.fullname[0]}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1 text-xs gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-bold text-[#2B3036] truncate">{conv.otherUser.fullname}</span>
+                          {conv.unreadCount > 0 && (
+                            <span className="min-w-5 h-5 px-1.5 rounded-full bg-[#0B1F5E] text-white text-[10px] font-bold inline-flex items-center justify-center">
+                              {conv.unreadCount > 99 ? '99+' : conv.unreadCount}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[#9AA1AC] whitespace-nowrap">{new Date(conv.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="text-xs text-[#6D7480] truncate whitespace-nowrap overflow-hidden">{conv.lastMessage}</div>
                       {conv.listing && (
-                        <div className="mt-2 text-[10px] font-black bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full inline-block truncate max-w-full">
-                          REF: {conv.listing.title.toUpperCase()}
+                        <div className="mt-2">
+                          {renderListingPreview(conv.listing, true)}
                         </div>
                       )}
                     </div>
@@ -153,55 +262,62 @@ export default function Messaging() {
               ))
             )}
           </div>
-        </div>
+        </aside>
 
         {/* Messaging Area */}
-        <div className="flex-1 bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden border border-gray-100">
+        <section className="bg-[#FBFCFD] rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] h-[70vh] flex flex-col overflow-hidden border border-[#E7E9ED]">
           {activeUser ? (
             <>
               {/* Chat Header */}
-              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
+              <div className="p-5 border-b border-[#EEF0F3] flex justify-between items-center bg-[#FAFBFC]">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-navy text-white rounded-full flex items-center justify-center font-black">
+                  <div className="w-10 h-10 bg-[#111827] text-white rounded-full flex items-center justify-center font-bold">
                     {activeUser.fullname[0]}
                   </div>
                   <div>
-                    <div className="font-black text-navy uppercase tracking-tight">{activeUser.fullname}</div>
-                    <div className="text-[10px] font-bold text-blue-600 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>
-                      ENCRYPTED CHANNEL
-                    </div>
+                    <div className="font-bold text-[#2B3036]">{activeUser.fullname}</div>
+                    <div className="text-[12px] text-[#6D7480]">Active conversation</div>
                   </div>
                 </div>
                 {activeListing && (
-                  <Link 
-                    to={`/${activeListing.type === 'VEHICLE' ? 'vehicle' : 'property'}/${activeListing._id}`}
-                    className="flex items-center gap-4 group"
+                  <Link
+                    to={getListingPath(activeListing)}
+                    className="hidden sm:flex items-center gap-3 group"
                   >
-                    <div className="text-right">
-                       <div className="text-xs font-black text-zinc-900 group-hover:text-navy transition">{activeListing.title.toUpperCase()}</div>
-                       <div className="text-[10px] font-black text-yellow-600">${activeListing.price?.toLocaleString()}</div>
+                    <div className="w-12 h-12 rounded-sm overflow-hidden bg-[#F0F2F5] border border-[#E7E9ED] shrink-0">
+                      <img
+                        src={resolveImageUrl(getListingImage(activeListing))}
+                        alt={activeListing.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <span className="text-xl group-hover:translate-x-1 transition-transform">→</span>
+                    <div className="text-right">
+                      <div className="text-xs font-semibold text-[#2B3036] group-hover:text-[#0B1F5E] transition line-clamp-1 max-w-[220px]">{activeListing.title}</div>
+                      <div className="text-[11px] font-bold text-[#0B1F5E]">LKR {activeListing.price?.toLocaleString()}</div>
+                    </div>
+                    <span className="text-lg text-[#9AA1AC] group-hover:text-[#0B1F5E] transition">→</span>
                   </Link>
                 )}
               </div>
 
               {/* Chat Content */}
-              <div className="flex-1 overflow-y-auto p-8 space-y-6">
+              <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6 space-y-4 bg-[#FBFCFD]">
                 {messages.map((m, idx) => {
                   const isSentByMe = (m.sender._id || m.sender) === currentUser._id;
                   return (
                     <div key={idx} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[70%] rounded-2xl p-4 shadow-sm relative group
-                        ${isSentByMe 
-                          ? 'bg-navy text-white rounded-tr-none' 
-                          : 'bg-gray-100 text-slate-800 rounded-tl-none'}`}
+                      <div className={`max-w-[80%] sm:max-w-[70%] rounded-sm px-4 py-3 border shadow-[0_1px_2px_rgba(0,0,0,0.03)]
+                        ${isSentByMe
+                          ? 'bg-[#111827] text-white border-[#111827]'
+                          : 'bg-white text-[#2B3036] border-[#E7E9ED]'}`}
                       >
-                        <div className="text-sm font-medium leading-relaxed">{m.content}</div>
-                        <div className={`text-[9px] mt-2 font-black uppercase tracking-widest opacity-40 
-                          ${isSentByMe ? 'text-white' : 'text-gray-500'}`}
-                        >
+                        {m.listing && (
+                          <div className="mb-3">
+                            {renderListingPreview(m.listing)}
+                          </div>
+                        )}
+                        <div className="text-sm leading-relaxed whitespace-pre-wrap">{m.content}</div>
+                        <div className={`text-[10px] mt-2 ${isSentByMe ? 'text-white/70' : 'text-[#9AA1AC]'}`}>
                           {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
@@ -212,34 +328,41 @@ export default function Messaging() {
               </div>
 
               {/* Chat Input */}
-              <form onSubmit={handleSendMessage} className="p-6 border-t border-gray-100 bg-gray-50/10">
-                <div className="flex gap-4">
-                  <input 
-                    type="text" 
+              <form onSubmit={handleSendMessage} className="mt-auto sticky bottom-0 p-4 sm:p-5 border-t border-[#EEF0F3] bg-[#FBFCFD]">
+                {activeListing && (
+                  <div className="mb-4">{renderListingPreview(activeListing)}</div>
+                )}
+                <div className="flex gap-3">
+                  <input
+                    type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Enter your message regarding the trade..."
-                    className="flex-1 bg-white border border-gray-200 rounded-2xl px-6 py-4 focus:border-navy outline-none shadow-sm transition-all text-sm font-medium"
+                    placeholder="Type your message..."
+                    className="flex-1 h-11 bg-[#F7F8FA] border border-[#E7E9ED] px-4 text-sm outline-none focus:border-[#0B1F5E]"
                   />
-                  <button 
+                  <button
                     type="submit"
-                    className="bg-navy text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-navy-light shadow-lg active:scale-95 transition-all outline-none"
+                    className="h-11 px-6 bg-[#0B1F5E] text-white text-sm font-bold hover:bg-[#081742] transition"
                   >
-                    SEND
+                    Send
                   </button>
                 </div>
               </form>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center opacity-20 p-12">
-               <div className="text-8xl mb-8">✉️</div>
-               <h3 className="text-2xl font-black uppercase tracking-widest">Select a Secure Communication<br />to Begin Negotiation</h3>
-               <p className="text-sm italic mt-4 max-w-sm">Every message sent through the Curated Authority is monitored for safety and integrity.</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-[#8A9099]">
+              <div className="text-6xl mb-4">✉️</div>
+              <h3 className="text-xl font-bold text-[#2B3036]">Select a conversation to start chatting</h3>
+              <p className="text-sm mt-2 max-w-md">Choose a user from the inbox on the left to view messages and continue the discussion.</p>
             </div>
           )}
+        </section>
+
         </div>
 
       </main>
+
+      <Footer />
 
     </div>
   );

@@ -82,16 +82,10 @@ const connectDB = async () => {
     }
   }
 
-  // Only listen to port locally. Vercel handles serving the app in production.
-  if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-      console.log(`READY: Server is listening on port ${PORT}`);
-      console.log(`URL: http://localhost:${PORT}`);
-    });
-  }
+  app.listen(PORT, () => {
+    console.log(`READY: Server is listening on port ${PORT}`);
+    console.log(`URL: http://localhost:${PORT}`);
+  });
 };
 
 connectDB();
-
-// Export the Express API for Vercel Serverless Functions
-export default app;
